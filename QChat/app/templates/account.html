@@ -1,0 +1,66 @@
+{% extends "template.html" %}
+
+{% block content %}
+    <div class="content-section">
+        <div class="media">
+            <img class="rounded-circle account-img" src="{{ image_file }}">     <!-- For anyone wondering rounded-circle is a bootstrap class that gives you circular image  -->
+            <div class="media-body">
+                <h2 class="account-heading">{{ current_user.username }}</h2>
+                <p class="text-secondary">{{ current_user.email }}</p>
+            </div>
+        </div>
+
+        <!-- FORM STARTS HERE -->
+
+        <form method="POST" action="" enctype="multipart/form-data">            <!-- enctype stands for encoding type, multipart/form-data will allow us to not onlu process text ('utf-8'), but also image files ('jpg', 'png') -->
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">Account Info</legend>
+                <div class="form-group">
+                    {{ form.username.label(class="form-control-label") }}
+
+                    {% if form.username.errors %}
+                        {{ form.username(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">
+                            {% for error in form.username.errors %}
+                                <span> {{ error }} </span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.username(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.email.label(class="form-control-label") }}
+                    
+                    {% if form.email.errors %}
+                        {{ form.email(class="form-control form-control-lg is-invalid") }}
+                        <div class="invalid-feedback">                                  <!-- For anyone wondering 'invalid-fedback' is just a bootstrap class it gives a red text under the input field where the error message can display -->
+                            {% for error in form.email.errors %}                        <!-- Loop through the errors in the form -->
+                                <span> {{ error }} </span>                              <!-- And print them out! -->
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {{ form.email(class="form-control form-control-lg") }}
+                    {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.picture.label() }}
+                    {{ form.picture(class="form-control-file") }}
+                    {% if form.picture.errors %}                                        <!-- If any error occurs while uploading a file in the form -->
+                        {% for error in form.picture.errors %}                          <!-- Loop through the errors in the form -->
+                            <span class="text-danger"> {{ error }} </span><br>          <!-- And print them out! For anyone wondering 'text-danger' is a bootstrap class it gives a red-ish hue -->
+                        {% endfor %}
+                    {% endif %}
+                </div>
+            </fieldset>
+
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+
+        <!-- FORM ENDS HERE -->
+
+    </div>
+{% endblock content %}

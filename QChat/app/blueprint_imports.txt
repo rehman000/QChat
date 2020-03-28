@@ -1,0 +1,199 @@
+# This is a huge pain! Probabbly one of the most annoying, and difficult 
+# import dependencies cycle issues I have ever faced in my entire life!        (ಥ╭╮ಥ)
+# I spent about 3 hours trying to fugure out what to import, and what to remove. (ง •̀_•́)ง
+
+# Lesson: Using Blue prints in Python are not for the feint of heart!
+# It is an exercise in patience, and fustration!!!
+
+#       (ノಠ益ಠ)ノ彡┻━┻  (ノಠ益ಠ)ノ彡┻━┻  (ノಠ益ಠ)ノ彡┻━┻  (ノಠ益ಠ)ノ彡┻━┻   (ノಠ益ಠ)ノ彡┻━┻
+
+# The benefit is that we can make our code more modular, re-useable, and it 
+# helps increase scalability. But my god was this difficult! (┛ಠ_ಠ)┛彡┻━┻
+
+#       ヽ( ಠ益ಠ )ﾉ   ヽ( ಠ益ಠ )ﾉ  ヽ( ಠ益ಠ )ﾉ   ヽ( ಠ益ಠ )ﾉ   ヽ( ಠ益ಠ )ﾉ   ヽ( ಠ益ಠ )ﾉ
+
+#------------------------------------------------------------------------------
+# Notes on Application Structure History and GOALS:
+#------------------------------------------------------------------------------
+
+# 1. Simple Flask App --    
+#   'Regular Python Single Module' 
+
+# 2. Restructured the entire application structure to use -- 
+#   'Packages' 
+#    Reason:     to avoid circular imports! But it may violate the PEP8 standards
+ 
+# 3. Restructured the entire application structure into sub-structure packages using -- 
+#   'Blueprints'
+#    Reason: Better, scalability, code modularity, etc.
+
+# 4. Restructered the init_app() components into create_app() function to create multiple instances, with multiple configurations
+#    Reason: to allow multiple configurations and multiple app instances to run for Unit Testing! 
+#            More maintainable application in the long run!
+
+
+# GOALS:
+# 1. Space Complexity still needs work!    (ノಠ益ಠ)ノ彡┻━┻ 
+
+#------------------------------------------------------------------------------
+
+
+
+
+#------------------------------------------------------------------------------
+# The following tree explains the File Structure for CodeHub:
+#------------------------------------------------------------------------------
+
+
+├── app
+│   ├── blueprint_imports.txt
+│   ├── config.py
+│   ├── database.db
+│   ├── errors
+│   │   ├── handlers.py
+│   │   ├── __init__.py
+│   │   └── __pycache__
+│   │       ├── handlers.cpython-38.pyc
+│   │       └── __init__.cpython-38.pyc
+│   ├── __init__.py
+│   ├── main
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── __init__.cpython-38.pyc
+│   │   │   └── routes.cpython-38.pyc
+│   │   └── routes.py
+│   ├── models.py
+│   ├── posts
+│   │   ├── forms.py
+│   │   ├── __init__.py
+│   │   ├── __pycache__
+│   │   │   ├── forms.cpython-38.pyc
+│   │   │   ├── __init__.cpython-38.pyc
+│   │   │   └── routes.cpython-38.pyc
+│   │   └── routes.py
+│   ├── __pycache__
+│   │   ├── config.cpython-38.pyc
+│   │   ├── __init__.cpython-38.pyc
+│   │   └── models.cpython-38.pyc
+│   ├── static
+│   │   ├── main.css
+│   │   └── profile_images
+│   │       ├── 53fa8c80cb8f07d2.jpg
+│   │       ├── 73933dcf6ece5589.jpg
+│   │       ├── a41e8879cea4dba5.png
+│   │       ├── b169d1fe59e8b623.png
+│   │       ├── b57c997a27cb7a5e.png
+│   │       ├── b82418344831a769.jpg
+│   │       ├── default.jpg
+│   │       ├── e7abcd9c7d0f3682.jpg
+│   │       ├── ed281b648c3e8981.jpg
+│   │       └── edb7154b333427af.jpg
+│   ├── templates
+│   │   ├── about.html
+│   │   ├── account.html
+│   │   ├── create_post.html
+│   │   ├── errors
+│   │   │   ├── 403.html
+│   │   │   ├── 404.html
+│   │   │   └── 500.html
+│   │   ├── home.html
+│   │   ├── login.html
+│   │   ├── post.html
+│   │   ├── register.html
+│   │   ├── reset_request.html
+│   │   ├── reset_token.html
+│   │   ├── template.html
+│   │   └── user_posts.html
+│   └── users
+│       ├── forms.py
+│       ├── __init__.py
+│       ├── __pycache__
+│       │   ├── forms.cpython-38.pyc
+│       │   ├── __init__.cpython-38.pyc
+│       │   ├── routes.cpython-38.pyc
+│       │   └── utils.cpython-38.pyc
+│       ├── routes.py
+│       └── utils.py
+├── README.md
+└── run.py
+
+
+#------------------------------------------------------------------------------
+#   Imports accross files
+#------------------------------------------------------------------------------
+
+# main/routes.py
+from flask import render_template, request, Blueprint
+from app.models import Post
+
+
+# posts/forms.py
+from flask_wtf import FlaskForm
+from wtforms import StringField, SubmitField, TextAreaField
+from wtforms.validators import DataRequired
+
+
+# post/routes.py
+from flask import (render_template, url_for, flash, redirect, request, abort, Blueprint)
+from flask_login import current_user, login_required
+from app import db
+from app.models import Post
+from app.posts.forms import PostForm
+
+
+# users/forms.py
+from flask_wtf import FlaskForm
+from flask_wtf.file import FileField, FileAllowed
+from wtforms import StringField, PasswordField, SubmitField, BooleanField
+from wtforms.validators import DataRequired, Length, Email, EqualTo, ValidationError
+from flask_login import current_user
+from app.models import User
+
+
+
+# users/routes.py
+from flask import render_template, url_for, flash, redirect, request, Blueprint
+from flask_login import login_user, current_user, logout_user, login_required
+from app import db, bcrypt
+from app.models import User, Post
+from app.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm)
+from app.users.utils import save_picture, send_reset_email
+
+
+
+# users/utils.py
+import os
+import secrets
+from PIL import Image
+from flask import url_for
+from flask_mail import Message
+from app import current_app, mail
+
+#------------------------------------------------------------------------------
+
+# Oh God this was tough! I Wish I was able to use search in directory/file Instance and Multi-Select replace like in Sublime Text 3
+# My Sublime Text is not properly configured to do that! Another 5 hours of debugging! ;-; 
+
+url_for('main.home')
+url_for('main.about')
+
+url_for('users.user_posts')
+url_for('users.login')
+url_for('users.logout')
+url_for('users.register')
+url_for('users.reset_request')
+url_for('users.request_reset')
+
+url_for('posts.create_post')
+url_for('posts.update_post')
+url_for('posts.delete_post')
+
+#------------------------------------------------------------------------------
+
+app imports need to be replaced with current_app:
+from flask import current_app
+
+Reason: This is because app is no longer in scope! It is inside the create_app() method
+inside __init__.py. Flask has a solution for this it's called current_app
+
+#------------------------------------------------------------------------------
