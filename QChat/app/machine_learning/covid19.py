@@ -113,7 +113,7 @@ def validate_txt(txt, word_index, model=None):
     prediction = model.predict(np.array([encoded], dtype=np.int32))[0] # a numoy of int33 datatype is only permitted
     return np.argmax(prediction)
 
-def validate_txt_json(txt, word_index_filename, model=None):
+def validate_txt_json(txt, word_index_filename=None, model=None):
     """
     Takes in text and the filename of word index json file and returns an integer determining if a text provides valid information 
     or misinformation about the COVID-19 virus.
@@ -124,6 +124,9 @@ def validate_txt_json(txt, word_index_filename, model=None):
     You can also optionally pass a model which represents a keras neural network instead of the function loading
     a pre-existing neural network
     """
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    if word_index_filename==None:
+        word_index_filename = 'dummy_word_decode.json'
     with open(os.path.join(file_dir, word_index_filename)) as f:
         word_index = json.load(f)
     return validate_txt(txt, word_index, model=model)
@@ -149,7 +152,7 @@ def json_train(data_filepath=None, word_index_filename='dummy_word_decode.json')
     model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40)
 
 def mongo_train():
-     """
+    """
     trains neural network using mongodb data
     """
     pass
