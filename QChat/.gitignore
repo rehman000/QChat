@@ -1,4 +1,5 @@
 venv
-run.sh
+*.sh
 __pycache__
 /[Ee]nv/
+.vscode

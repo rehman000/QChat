@@ -9,3 +9,4 @@ class Config:
     MAIL_USE_TLS = True
     MAIL_USERNAME = os.environ.get('MAIL_USERNAME')                # This will not work for you!
     MAIL_PASSWORD = os.environ.get('MAIL_PASSWORD')                # This will not work for you! 
+    MONGO_URI=os.environ.get('MONGO_URI')
