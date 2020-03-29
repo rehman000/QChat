@@ -94,34 +94,45 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
     model.save(os.path.join(file_dir, "covid19_info_validator.h5"))
     return model
 
-def validate_covid19(txt, model=None, word_index_filename=None):
+def validate_txt(txt, word_index, model=None):
     """
-    Takes in text and returns an integer determining if a text provides valid information 
+    Takes in text and an encoding word index and returns an integer determining if a text provides valid information 
     or misinformation about the COVID-19 virus.
     If a text is valid, then the function returns 0.
     If a text is neither valid nor misinformation, returns 1.
     If a text is misinformation, returns 2
 
-    You can also optionally pass a model too which represents a keras neural network
-    and word_index_filename which is a path to a word index json file
+    You can also optionally pass a model which represents a keras neural network instead of the function loading
+    a pre-existing neural network
     """
     if model==None:
         file_dir = os.path.dirname(os.path.abspath(__file__))
         model = keras.models.load_model(os.path.join(file_dir, "covid19_info_validator.h5"))
-    
-    if word_index_filename == None:
-        pass # will impliment mongodb querying
-    else:
-        with open(os.path.join(file_dir, word_index_filename)) as f:
-            word_index = json.load(f)
 
     encoded = preprocess_txt(txt, word_index=word_index)
     prediction = model.predict(np.array([encoded], dtype=np.int32))[0] # a numoy of int33 datatype is only permitted
     return np.argmax(prediction)
 
+def validate_txt_json(txt, word_index_filename, model=None):
+    """
+    Takes in text and the filename of word index json file and returns an integer determining if a text provides valid information 
+    or misinformation about the COVID-19 virus.
+    If a text is valid, then the function returns 0.
+    If a text is neither valid nor misinformation, returns 1.
+    If a text is misinformation, returns 2
+
+    You can also optionally pass a model which represents a keras neural network instead of the function loading
+    a pre-existing neural network
+    """
+    with open(os.path.join(file_dir, word_index_filename)) as f:
+        word_index = json.load(f)
+    return validate_txt(txt, word_index, model=model)
+        
+    
+
 def json_train(data_filepath=None, word_index_filename='dummy_word_decode.json'):
     """
-    trains neural network from a json file give
+    trains neural network from a json data
     """
     if data_filepath == None:
         file_dir = os.path.dirname(os.path.abspath(__file__))
@@ -137,6 +148,12 @@ def json_train(data_filepath=None, word_index_filename='dummy_word_decode.json')
 
     model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40)
 
+def mongo_train():
+     """
+    trains neural network using mongodb data
+    """
+    pass
+
 if __name__ == '__main__':
     """
     testing to see if the library is functional
@@ -145,5 +162,5 @@ if __name__ == '__main__':
     file_dir = os.path.dirname(os.path.abspath(__file__))
     word_index_filepath = os.path.join(file_dir, 'dummy_word_decode.json')
     txt = input()
-    res = validate_covid19(txt, word_index_filename=word_index_filepath)
+    res = validate_txt_json(txt, word_index_filepath)
     print(res)
