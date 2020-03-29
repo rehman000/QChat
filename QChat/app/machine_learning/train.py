@@ -1,11 +1,10 @@
-from sys import argv
-import covid19 
+from app.machine_learning import covid19 
 
-if __name__ == '__main__':
-    if argv[1].lower() == 'covid19':
-        if argv[2] == 'json':
-            covid19.json_train()
-        else:
-            covid19.mongo_train()
+def train_covid19(method):
+    """
+    takes a string ai which determines which AI is trained and method which determines how it is trained
+    """
+    if method == 'json':
+        covid19.json_train()
     else:
-        print('no valid arguments given')
+        covid19.mongo_train()
