@@ -111,27 +111,7 @@ def validate_txt(txt, word_index, model=None):
 
     encoded = preprocess_txt(txt, word_index=word_index)
     prediction = model.predict(np.array([encoded], dtype=np.int32))[0] # a numoy of int33 datatype is only permitted
-    return np.argmax(prediction)
-
-def validate_txt_json(txt, word_index_filename=None, model=None):
-    """
-    Takes in text and the filename of word index json file and returns an integer determining if a text provides valid information 
-    or misinformation about the COVID-19 virus.
-    If a text is valid, then the function returns 0.
-    If a text is neither valid nor misinformation, returns 1.
-    If a text is misinformation, returns 2
-
-    You can also optionally pass a model which represents a keras neural network instead of the function loading
-    a pre-existing neural network
-    """
-    file_dir = os.path.dirname(os.path.abspath(__file__))
-    if word_index_filename==None:
-        word_index_filename = 'dummy_word_decode.json'
-    with open(os.path.join(file_dir, word_index_filename)) as f:
-        word_index = json.load(f)
-    return validate_txt(txt, word_index, model=model)
-        
-    
+    return np.argmax(prediction)    
 
 def json_train(data_filepath=None, word_index_filename='dummy_word_decode.json'):
     """
@@ -156,6 +136,56 @@ def mongo_train():
     trains neural network using mongodb data
     """
     pass
+
+def validate_txt_json(txt, word_index_filename=None, model=None):
+    """
+    Takes in text and the filename of word index json file and returns an integer determining if a text provides valid information 
+    or misinformation about the COVID-19 virus.
+    If a text is valid, then the function returns 0.
+    If a text is neither valid nor misinformation, returns 1.
+    If a text is misinformation, returns 2
+
+    You can also optionally pass a model which represents a keras neural network instead of the function loading
+    a pre-existing neural network
+    """
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    if word_index_filename==None:
+        word_index_filename = 'dummy_word_decode.json'
+    with open(os.path.join(file_dir, word_index_filename)) as f:
+        word_index = json.load(f)
+    return validate_txt(txt, word_index, model=model)
+
+def validate_txt_mongo(txt, model=None):
+    """
+    To be used if your data is stored in a mongodb database
+    Takes in text and returns an integer determining if a text provides valid information 
+    or misinformation about the COVID-19 virus.
+    If a text is valid, then the function returns 0.
+    If a text is neither valid nor misinformation, returns 1.
+    If a text is misinformation, returns 2
+
+    You can also optionally pass a model which represents a keras neural network instead of the function loading
+    a pre-existing neural network.
+    """
+    return 1
+
+def validate_txt(txt, use_json=False, model=False):
+    """
+    Takes in text and returns an integer determining if a text provides valid information 
+    or misinformation about the COVID-19 virus.
+    If a text is valid, then the function returns 0.
+    If a text is neither valid nor misinformation, returns 1.
+    If a text is misinformation, returns 2
+
+    By default the app validates information using data from mongodb but you can set use_json to True to use json data.
+
+    You can also optionally pass a model which represents a keras neural network instead of the function loading
+    a pre-existing neural network
+    """
+    if use_json:
+        return validate_txt_json(txt, model=model)
+    else:
+        return validate_txt_mongo(txt, model=model)
 
 if __name__ == '__main__':
     """
