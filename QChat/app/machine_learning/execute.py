@@ -8,7 +8,7 @@ def print_help():
     print('\t train: trains a specific machine learning AI \n\n\t\tpython run.py ml train <AI> <storage method>\n')
     print('\t check: tests a machine learning AI to see if it is functional\n\n\t\tpython run.py ml check <AI> <storage method>\n')
     print('\t data: manage trainibg data\n\n\t\tpython run.py ml data <data_method> [option]\n')
-    print('\t\tdata methods:\n\n\t\t\t json_mango: sends json training data to a mongo database\n')
+    print('\t\tdata methods:\n\n\t\t\t json_mongo: sends json training data to a mongo database\n')
     print('\t\toptions:\n\n\t\t\t splice: splice training data if they are in a text form\n')
     print('\t help: show help\n')
     print('AI:\n') 
