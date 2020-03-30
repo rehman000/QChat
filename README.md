@@ -131,8 +131,16 @@ In QChat/app/config.py
         export MAIL_USERNAME="<an email adress>"
         export MAIL_PASSWORD="<a password for that email address"
 
-        # this will create a neural network using local static json data
-        python run.py ml train covid19 json 
+# The follwing command will create a neural network using local static json data
+    
+    python run.py ml train covid19 json 
 
-        # executes the web server on port 5000
-        python run.py 
+# To start the application 
+In the QChat Directory:
+
+    python run.py 
+
+# The WebServer is started on port 5000:
+On your browser navigate to:
+
+    http://localhost:5000/
