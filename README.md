@@ -1,10 +1,10 @@
 # QChat
 A social media application that provides verified information regarding the Corona Virus, COVID-19.
 
-To execute our app, you need python and pip.
+To execute our app, you will need python3.6 and greater and pip.
 To run the app:
 
-1. move to QChat/QChat/
+1. Navigate to the directory:  QChat/QChat/
 2. type the following: 
     
     
