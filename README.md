@@ -136,11 +136,19 @@ To run the app:
 # Enviornmental Variables: 
 These are the following enviornmental path variables:
 
-        export SECRET_KEY="TODDKING"
+        export SECRET_KEY="mysecretkey"
         export SQLALCHEMY_DATABASE_URI="sqlite:///database.db"
         export MONGO_URI="mongodb://localhost:27017/myDatabase"
         export MAIL_USERNAME="<an email adress>"
-        export MAIL_PASSWORD="<a password for that email address"
+        export MAIL_PASSWORD="<a password for that email address>"
+
+#### Information about the environment variables
+* SQLALCHEMY_DATABASE_URI represents the url to an SQL database
+* MONGO_URI represents the url to a mongodb database
+* SECRET_KEY represents your secret key
+* MAIL_USERNAME represents an email address
+* MAIL_PASSWORD represents an email password
+
 
 An important note, in order for the password reset functionality to properly work. 
 You need to provide a valid Gmail username, and password, BUT also enable this:
