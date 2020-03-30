@@ -1,5 +1,5 @@
 # QChat
-QChat is a social media application where users can log in, create, update, and delete their posts. They can upload their own profile images, and communicate with one another, to share information, resources, and jobs listings during the COVID-19 pandemic.
+QChat is a social media application where users can log in, create, update, and delete their posts. They can upload their own profile images, and communicate with one another, to share information, resources, and jobs listings during the COVID-19 pandemic. The information on each post is validated for it's accuracy using a neural network to prevent misinformation regarding COVID-19 from spreading rampant on the platform. 
 
 # The File Structure is as follows:
 
@@ -111,16 +111,19 @@ QChat is a social media application where users can log in, create, update, and 
 └── run.py
 ```
 
-# To execute our app, you will need python3.6 and greater and pip.
+# To execute our app, you will need python3.6 or greater and pip.
 To run the app:
 
-1. Navigate to the following directory:  QChat/QChat/
+1. Navigate to the following directory:  QChat/
 2. type the following: 
     
-    
-        # installs all dependencies
-    
-        pip install -r requirements.txt
+# To install all dependencies:
+        
+    pip install -r requirements.txt
+
+# Enviornmental Variables: 
+These are the following enviornmental path variables you will need to set up.
+In QChat/app/config.py
 
         export SECRET_KEY="TODDKING"
         export SQLALCHEMY_DATABASE_URI="sqlite:///database.db"
