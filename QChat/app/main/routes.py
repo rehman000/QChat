@@ -1,6 +1,6 @@
 from flask import render_template, request, Blueprint
 from app.models import Post
-
+from app.machine_learning.covid19 import validate_txt_json
 
 main = Blueprint('main', __name__)
 
@@ -34,7 +34,13 @@ def home():                                                                     
     posts = Post.query.order_by(Post.date_posted.desc()).paginate(page=page, per_page=5)                            # Instead of using query.all(), I've changed this to query.paginate() ... 
                                                                                                                     # By using .query.order_by(Post.date_posted.desc())  I am able to show posts in a descending order of creation.
                                                                                                                     # Translation: The newer posts will be seen on the top, while the older posts will sink to the bottom and eventually to other paginated pages! 
-    return render_template('home.html', posts=posts)                                                                
+    post_valid = posts.items
+     
+    for post in post_valid:
+        post.validity = validate_txt_json(post.content)
+        # print(post)
+    
+    return render_template('home.html', posts=posts, post_valid=post_valid)                                                                
 
 
 

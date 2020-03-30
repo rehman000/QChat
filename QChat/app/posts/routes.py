@@ -5,7 +5,6 @@ from app.models import Post
 from app.posts.forms import PostForm
 
 
-
 posts = Blueprint('posts', __name__)
 
 # CRUD Methods: 

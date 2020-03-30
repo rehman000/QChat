@@ -1,2 +1,6 @@
+venv
+*.sh
 __pycache__
 /[Ee]nv/
+.vscode
+*.h5

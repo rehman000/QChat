@@ -2,6 +2,21 @@
 
 {% block content %}
     {% for post in posts.items %}   <!-- So now posts is an object, that we're using paginate to loop through on fixed increments! -->
+        
+        {% if post.validity == 1%} <!-- When it's 1 -->
+            <div class="ml-auto">     
+                <img src="{{ url_for('static', filename='check_1.jpg') }}">
+            </div>
+        {% elif post.validity == 0 %} <!-- When it's 0 -->
+            <div class="ml-auto">    
+                <img src="{{ url_for('static', filename='check_0.jpg') }}">
+            </div>
+        {% else  %}     <!-- When it's 2 -->
+            <div class="ml-auto">    
+                <img src="{{ url_for('static', filename='check_2.jpg') }}">
+            </div>
+        {% endif %}
+
         <article class="media content-section">
             <img class="rounded-circle article-img" src="{{ url_for('static', filename='profile_images/' + post.author.image_file ) }}">  <!-- Recall author is a backref -->
             <div class="media-body">
@@ -13,6 +28,7 @@
                 <p class="article-content">{{ post.content }}</p>
             </div>
         </article>
+
     {% endfor %}
     <!-- Pagination -->
     {% for page_num in posts.iter_pages(left_edge=1, right_edge=1, left_current=1, right_current=2) %}
