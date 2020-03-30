@@ -124,7 +124,7 @@ To run the app:
     pip install -r requirements.txt
 
 # Enviornmental Variables: 
-These are the following enviornmental path variables you will need to set up.
+These are the following enviornmental path variables:
 
         export SECRET_KEY="TODDKING"
         export SQLALCHEMY_DATABASE_URI="sqlite:///database.db"
