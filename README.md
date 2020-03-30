@@ -1,7 +1,7 @@
 # QChat
-A social media application that provides verified information regarding the Corona Virus, COVID-19.
+QChat is a social media application where users can log in, create, update, and delete their posts. They can upload their own profile images, and communicate with one another, to share information, resources, and jobs listings during the COVID-19 pandemic.
 
-The File Structure is as follows:
+# The File Structure is as follows:
 
 ```
 ./
@@ -109,14 +109,12 @@ The File Structure is as follows:
 ├── README.md
 ├── requirements.txt.
 └── run.py
-
-
 ```
 
-To execute our app, you will need python3.6 and greater and pip.
+# To execute our app, you will need python3.6 and greater and pip.
 To run the app:
 
-1. Navigate to the directory:  QChat/QChat/
+1. Navigate to the following directory:  QChat/QChat/
 2. type the following: 
     
     
