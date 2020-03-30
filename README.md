@@ -111,7 +111,9 @@ QChat is a social media application where users can log in, create, update, and 
 └── run.py
 ```
 
-# To execute our app, you will need python3.6 or greater and pip.
+# To execute our app, 
+- you will need python3.6 or greater and pip.
+
 To run the app:
 
 1. Navigate to the following directory:  QChat/
@@ -123,7 +125,6 @@ To run the app:
 
 # Enviornmental Variables: 
 These are the following enviornmental path variables you will need to set up.
-In QChat/app/config.py
 
         export SECRET_KEY="TODDKING"
         export SQLALCHEMY_DATABASE_URI="sqlite:///database.db"
@@ -136,7 +137,7 @@ will create a neural network using local static json data
     
     python run.py ml train covid19 json 
 
-# To start the application 
+# To start the application: 
 In the QChat Directory run the following command:
 
     python run.py 
