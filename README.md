@@ -132,6 +132,14 @@ These are the following enviornmental path variables:
         export MAIL_USERNAME="<an email adress>"
         export MAIL_PASSWORD="<a password for that email address"
 
+An important note, in order for the password reset functionality to properly work. 
+You need to provide a valid Gmail username, and password, BUT also enable this:
+
+https://myaccount.google.com/lesssecureapps
+
+Or else it will not work. Google by default disables this feature, since most people are not developers.
+This is mostly to allow developers to debug their applications, before deploying it to any cloud service.
+
 # The following command: 
 will create a neural network using local static json data
     
