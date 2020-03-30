@@ -2,7 +2,6 @@ import tensorflow as tf
 from tensorflow import keras
 import json
 from app import mongo
-from flask import Flask
 import numpy as np
 import os
 
@@ -33,7 +32,7 @@ def clean_txt(txt):
     """
     Returns a list of words from string txt that removes unneeded characters and sets them all to be lowercases
     """
-    return txt.replace(",", "").replace(".", "").replace("(", "").replace(")", "").replace(":", "").replace("\"", "").replace("\n", "").replace("\t", "").lower().strip().split(" ")
+    return txt.replace(",", "").replace(".", "").replace("(", "").replace(")", "").replace(":", "").replace("\"", "").replace("\n", "").replace("\t", "").replace("$", "dollar_").replace("_id", "_iid").lower().strip().split(" ")
 
 def preprocess_txt(txt, word_index, max_txt_size=250):
     """
@@ -94,22 +93,32 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
     model.save(os.path.join(file_dir, "covid19_info_validator.h5"))
     return model
 
-def json_train(data_filepath=None, word_index_filename='dummy_word_decode.json'):
+def json_train(data_filepath=None, word_index_filename='word_decode.json'):
     """
     trains neural network from a json data
     """
     if data_filepath == None:
         file_dir = os.path.dirname(os.path.abspath(__file__))
-        data_filepath = os.path.join(file_dir, 'dummy_text_data.json')
+        data_filepath = os.path.join(file_dir, 'data', 'text_data.json')
 
     with open(data_filepath) as f: 
         training_collection = json.load(f) # get training collection
 
     x_train, y_train, word_index = preprocess_training_collection(training_collection) # preprocess training collection
 
-    with open(os.path.join(file_dir, word_index_filename), 'w') as f:
+    with open(os.path.join(file_dir, 'data', word_index_filename), 'w') as f:
         json.dump(word_index, f) # store word index
 
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40)
+
+def mongo_train():
+    """
+    trains neural network using mongodb data
+    """
+    training_collection = list(mongo.db.traindata.find({}, {"_id": 0, "text": 1, "valid": 1}))
+    x_train, y_train, word_index = preprocess_training_collection(training_collection) # preprocess training collection
+    mongo.db.wordindex.drop()
+    mongo.db.wordindex.insert_one(word_index)
     model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40)
 
 def validate_txt_with_index(txt, word_index, model=None):
@@ -123,21 +132,15 @@ def validate_txt_with_index(txt, word_index, model=None):
     You can also optionally pass a model which represents a keras neural network instead of the function loading
     a pre-existing neural network
     """
-    if model==None:
+    if not model:
         file_dir = os.path.dirname(os.path.abspath(__file__))
         model = keras.models.load_model(os.path.join(file_dir, "covid19_info_validator.h5"))
-
+        
     encoded = preprocess_txt(txt, word_index=word_index)
     prediction = model.predict(np.array([encoded], dtype=np.int32))[0] # a numoy of int33 datatype is only permitted
     return np.argmax(prediction)    
 
-def mongo_train():
-    """
-    trains neural network using mongodb data
-    """
-    pass
-
-def validate_txt_json(txt, word_index_filename=None, model=None):
+def validate_txt_json(txt, word_index_filepath=None, model=None):
     """
     Takes in text and the filename of word index json file and returns an integer determining if a text provides valid information 
     or misinformation about the COVID-19 virus.
@@ -149,9 +152,9 @@ def validate_txt_json(txt, word_index_filename=None, model=None):
     a pre-existing neural network
     """
     file_dir = os.path.dirname(os.path.abspath(__file__))
-    if word_index_filename==None:
-        word_index_filename = 'dummy_word_decode.json'
-    with open(os.path.join(file_dir, word_index_filename)) as f:
+    if word_index_filepath==None:
+        word_index_filepath = os.path.join(file_dir, 'data' + os.sep + 'word_decode.json')
+    with open(word_index_filepath) as f:
         word_index = json.load(f)
     return validate_txt_with_index(txt, word_index, model=model)
 
@@ -167,7 +170,8 @@ def validate_txt_mongo(txt, model=None):
     You can also optionally pass a model which represents a keras neural network instead of the function loading
     a pre-existing neural network.
     """
-    return 1
+    word_index = mongo.db.wordindex.find_one()
+    return validate_txt_with_index(txt, word_index, model=model)
 
 def validate_txt(txt, use_json=False, model=False):
     """

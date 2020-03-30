@@ -6,5 +6,7 @@ def train_covid19(method):
     """
     if method == 'json':
         covid19.json_train()
-    else:
+    elif method == 'mongo':
         covid19.mongo_train()
+    else:
+        print('invalid training method')

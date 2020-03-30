@@ -10,7 +10,12 @@ if __name__ == "__main__":
 	if len(argv) == 1:
 		app.run(debug=True) 
 	elif argv[1] == 'ml':
-		from app.machine_learning import execute, covid19, train, check
+		from app.machine_learning import execute
 		execute.execute(argv[2:])
+	elif argv[1] == 'help':
+		print('\n\npython run.py <subject> <command>\n')
+		print('Subjects\n') 
+		print('\t ml: executes machine learning related tasks \n\n\t\tpython run.py ml <action>\n')
+		print('\t help: show help\n')
 	else:
 		print('invalid parameter')
