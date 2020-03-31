@@ -32,9 +32,9 @@ def clean_txt(txt):
     """
     Returns a list of words from string txt that removes unneeded characters and sets them all to be lowercases
     """
-    return txt.replace(",", "").replace(".", "").replace("(", "").replace(")", "").replace(":", "").replace("\"", "").replace("\n", "").replace("\t", "").replace("$", "dollar_").replace("_id", "_iid").lower().strip().split(" ")
+    return txt.replace(",", " , ").replace(".", " _period_ ").replace("(", " ( ").replace(")", " ) ").replace("!", " _explanation_mark_ ").replace("?", " _question_mark_ ").replace(":", " : ").replace("\"", " \" ").replace("\n", "").replace("\t", "").replace("$", "dollar_").replace("_id", "_iid").lower().strip().split(" ")
 
-def preprocess_txt(txt, word_index, max_txt_size=250):
+def preprocess_txt(txt, word_index, max_txt_size=255):
     """
     preprocesses a string named txt into a list of encoded integers based on word_index whose index is a word and whose value is an encoded integer
     """
@@ -49,7 +49,7 @@ def preprocess_txt(txt, word_index, max_txt_size=250):
     return encoded
 
 
-def preprocess_training_collection(collection, max_txt_size=250):
+def preprocess_training_collection(collection, max_txt_size=255):
     """
     Takes in a list of dictionaries where each dictionary takes the form:
     {
@@ -76,6 +76,7 @@ def train_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=7, ba
     model = keras.Sequential()
     model.add(keras.layers.Embedding(embeding_dim[0],embeding_dim[1]))
     model.add(keras.layers.GlobalAveragePooling1D())
+    model.add(keras.layers.Dense(64,activation="relu"))
     model.add(keras.layers.Dense(16,activation="relu"))
     model.add(keras.layers.Dense(3,activation="softmax"))
 

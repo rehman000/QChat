@@ -1,7 +1,7 @@
 from app import mongo
 import json
 
-def split_data(entry, word_count=250):
+def split_data(entry, word_count=255):
     valid = entry['valid']
     text = entry['text']
     new_data = []
