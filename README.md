@@ -126,7 +126,7 @@ QChat is a social media application where users can log in, create, update, and 
 
 To run the app:
 
-1. Navigate to the following directory:  QChat/QChat
+1. Navigate to the root directory:  QChat/
 2. type the following: 
     
 # To install all dependencies:

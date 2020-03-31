@@ -1,1 +1,1 @@
-web: python QChat/run.py ml data json_mongo && python QChat/run.py ml train covid19 mongo && python QChat/run.py 
+web: python run.py ml data json_mongo && python run.py ml train covid19 mongo && python run.py 
