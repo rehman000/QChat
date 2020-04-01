@@ -59,6 +59,7 @@ def preprocess_training_collection(collection, max_txt_size=255):
     and max_txt_size which will set the size of your texts in collection to that size.
     It will return a list of encoded texts, a list of valid labels, and a word_index that maps a word to an encoded integer form
     """
+    np.random.shuffle(collection)
     labels = np.array([data['valid'] for data in collection], dtype=np.int32)
     texts =  [data['text'] for data in collection]
     word_dump = []
@@ -89,7 +90,24 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
     """
     trains neural network with training data and saves it
     """
-    model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
+    if validation_data == None:
+        print('no validation data added')
+        model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
+    else:
+        max_accuracy = 0
+        model = None
+        for i in range(10):
+            print(f'Beggining to train the {i}th model')
+            new_model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
+            accuracy = new_model.evaluate(validation_data[0], validation_data[1])[1]
+            print(f'Finished training {i}th model with validation accuracy {accuracy}')
+            if accuracy > max_accuracy:
+                model = new_model
+                max_accuracy = accuracy
+                print(f'More accurate model chosen.\nChosen model\'s validation Accuracy: {max_accuracy}')
+            else:
+                print('Model not accurate enough, model discarded ... ')
+        print(f'Will now save model with validation accuracy: {max_accuracy}')
     file_dir = os.path.dirname(os.path.abspath(__file__))
     model.save(os.path.join(file_dir, "covid19_info_validator.h5"))
     return model
@@ -105,22 +123,29 @@ def json_train(data_filepath=None, word_index_filename='word_decode.json'):
     with open(data_filepath) as f: 
         training_collection = json.load(f) # get training collection
 
+    train_size = len(training_collection) - len(training_collection)//5
+
     x_train, y_train, word_index = preprocess_training_collection(training_collection) # preprocess training collection
+    x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
 
     with open(os.path.join(file_dir, 'data', word_index_filename), 'w') as f:
         json.dump(word_index, f) # store word index
 
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40)
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40, validation_data=(x_val, y_val))
 
 def mongo_train():
     """
     trains neural network using mongodb data
     """
     training_collection = list(mongo.db.traindata.find({}, {"_id": 0, "text": 1, "valid": 1}))
+    train_size = len(training_collection) - len(training_collection)//5
+
     x_train, y_train, word_index = preprocess_training_collection(training_collection) # preprocess training collection
+    x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
+
     mongo.db.wordindex.drop()
     mongo.db.wordindex.insert_one(word_index)
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40)
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40, validation_data=(x_val, y_val))
 
 def validate_txt_with_index(txt, word_index, model=None):
     """
