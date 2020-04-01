@@ -97,10 +97,10 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
         max_accuracy = 0
         model = None
         for i in range(10):
-            print(f'Beggining to train the {i}th model')
+            print(f'Beggining to train the {i+1}th model')
             new_model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
             accuracy = new_model.evaluate(validation_data[0], validation_data[1])[1]
-            print(f'Finished training {i}th model with validation accuracy {accuracy}')
+            print(f'Finished training {i+1}th model with validation accuracy {accuracy}')
             if accuracy > max_accuracy:
                 model = new_model
                 max_accuracy = accuracy
