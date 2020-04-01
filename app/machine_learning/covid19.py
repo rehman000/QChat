@@ -95,18 +95,22 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
         model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
     else:
         max_accuracy = 0
+        average_accuracy = 0
         model = None
         for i in range(10):
             print(f'Beggining to train the {i+1}th model')
             new_model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
             accuracy = new_model.evaluate(validation_data[0], validation_data[1])[1]
             print(f'Finished training {i+1}th model with validation accuracy {accuracy}')
+
+            average_accuracy = (i*average_accuracy + accuracy)/(i+1)
             if accuracy > max_accuracy:
                 model = new_model
                 max_accuracy = accuracy
                 print(f'More accurate model chosen.\nChosen model\'s validation Accuracy: {max_accuracy}')
             else:
                 print('Model not accurate enough, model discarded ... ')
+        print(f'the average accuracy of all models is {average_accuracy}')
         print(f'Will now save model with validation accuracy: {max_accuracy}')
     file_dir = os.path.dirname(os.path.abspath(__file__))
     model.save(os.path.join(file_dir, "covid19_info_validator.h5"))
@@ -131,7 +135,7 @@ def json_train(data_filepath=None, word_index_filename='word_decode.json'):
     with open(os.path.join(file_dir, 'data', word_index_filename), 'w') as f:
         json.dump(word_index, f) # store word index
 
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=30, validation_data=(x_val, y_val))
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=20, validation_data=(x_val, y_val))
 
 def mongo_train():
     """
@@ -145,7 +149,7 @@ def mongo_train():
 
     mongo.db.wordindex.drop()
     mongo.db.wordindex.insert_one(word_index)
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=30, validation_data=(x_val, y_val))
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 32), epochs=20, validation_data=(x_val, y_val))
 
 def validate_txt_with_index(txt, word_index, model=None):
     """
