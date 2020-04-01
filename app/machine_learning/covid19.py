@@ -116,13 +116,16 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
     model.save(os.path.join(file_dir, "covid19_info_validator.h5"))
     return model
 
-def json_train(data_filepath=None, word_index_filename='word_decode.json'):
+def json_train(data_filepath=None, word_index_filename=None):
     """
     trains neural network from a json data
     """
-    if data_filepath == None:
-        file_dir = os.path.dirname(os.path.abspath(__file__))
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    if data_filepath == None:        
         data_filepath = os.path.join(file_dir, 'data', 'text_data.json')
+
+    if word_index_filename == None:
+        word_index_filename = os.path.join(file_dir, 'data', 'word_decode.json')
 
     with open(data_filepath) as f: 
         training_collection = json.load(f) # get training collection
@@ -132,7 +135,7 @@ def json_train(data_filepath=None, word_index_filename='word_decode.json'):
     x_train, y_train, word_index = preprocess_training_collection(training_collection) # preprocess training collection
     x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
 
-    with open(os.path.join(file_dir, 'data', word_index_filename), 'w') as f:
+    with open(word_index_filename, 'w') as f:
         json.dump(word_index, f) # store word index
 
     model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=20, validation_data=(x_val, y_val))
