@@ -49,6 +49,7 @@ pdfminer==20191125
 pdfminer.six==20200124
 Pillow==7.0.0
 protobuf==3.11.3
+psycopg2==2.8.4
 pyasn1==0.4.8
 pyasn1-modules==0.2.8
 pycparser==2.20

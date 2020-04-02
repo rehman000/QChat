@@ -3,6 +3,10 @@ from itsdangerous import TimedJSONWebSignatureSerializer as Serializer          
 from flask import current_app                                                       # I need to import this instead of app, because app is now in create_app(), so it's out of scope!
 from app import db, login_manager                                                   # Resolves issue with circular imports! Login manager is a flask-extension
 from flask_login import UserMixin                                                   # Really useful extension for authentication, and session management, accepts user_id 
+from flask_migrate import Migrate
+
+def database_migrate():                                                             # This is to migrate changes in our models to our database
+    migrate = Migrate(current_app, db)
 
 
 @login_manager.user_loader 
