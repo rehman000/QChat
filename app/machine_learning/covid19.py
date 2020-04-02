@@ -104,15 +104,15 @@ def mongo_train(splice=True):
     """
     trains neural network using mongodb data
     """
-    with mongo.db.traindata.find({}, {"_id": 0, "text": 1, "valid": 1}) as c:
+    with mongo.db.covid19TextData.find({}, {"_id": 0, "text": 1, "valid": 1}) as c:
         training_collection = list(c)
     train_size = len(training_collection) - len(training_collection)//5
 
     x_train, y_train, word_index = preprocess_covid19_data(training_collection, splice=splice) # preprocess training collection
     x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
 
-    mongo.db.wordindex.drop()
-    mongo.db.wordindex.insert_one(word_index)
+    mongo.db.wordIndex.drop()
+    mongo.db.wordIndex.insert_one(word_index)
     model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 32), epochs=20, validation_data=(x_val, y_val))
 
 def validate_txt_with_index(txt, word_index, model=None):
@@ -164,7 +164,7 @@ def validate_txt_mongo(txt, model=None):
     You can also optionally pass a model which represents a keras neural network instead of the function loading
     a pre-existing neural network.
     """
-    word_index = mongo.db.wordindex.find_one()
+    word_index = mongo.db.wordIndex.find_one()
     return validate_txt_with_index(txt, word_index, model=model)
 
 def validate_txt(txt, use_json=False, model=False):
