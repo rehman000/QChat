@@ -4,52 +4,10 @@ import json
 from app import mongo
 import numpy as np
 import os
-
-def word_indexer(word_lst: list):
-    """
-    takes in a list of words (i.e. strings without whitespacing and line breaks) and returns
-    an encoding mapping dictionary where the key is the word and the value is its encoded integer form.
-    In this encoding, 3 special keys exist:
-        '<PAD>'     : 0     represents padding
-        '<START>'   : 1     represents starting word
-        '<UNK>'     : 2     represents uknown word
-        '<UNUSED>'  : 3     represents unused word
-    """
-    unique_words = list(set(word_lst))
-    word_index = {}
-    for i in range(len(unique_words)):
-        word_index[unique_words[i].lower()] = i + 4
-    word_index['<PAD>'] = 0
-    word_index['<START>'] = 1
-    word_index['<UNK>'] = 2
-    word_index['<UNUSED>'] = 3
-    return word_index
-
-def reverse_word_index(word_index):
-    return dict([(word_index[word], word) for word in word_index])
-
-def clean_txt(txt):
-    """
-    Returns a list of words from string txt that removes unneeded characters and sets them all to be lowercases
-    """
-    return txt.replace(",", " , ").replace(".", " _period_ ").replace("(", " ( ").replace(")", " ) ").replace("!", " _explanation_mark_ ").replace("?", " _question_mark_ ").replace(":", " : ").replace("\"", " \" ").replace("\n", "").replace("\t", "").replace("$", "dollar_").replace("_id", "_iid").lower().strip().split(" ")
-
-def preprocess_txt(txt, word_index, max_txt_size=255):
-    """
-    preprocesses a string named txt into a list of encoded integers based on word_index whose index is a word and whose value is an encoded integer
-    """
-    wd_list = clean_txt(txt)
-    encoded = [1]
-    for word in wd_list:
-        if word in word_index:
-            encoded.append(word_index[word])
-        else:
-            encoded.append(word_index["<UNK>"]) 
-    encoded = keras.preprocessing.sequence.pad_sequences([encoded], value=word_index["<PAD>"], padding="post", maxlen=max_txt_size)[0]
-    return encoded
+from app.machine_learning.data.process import preprocess_txt, listify_txt, word_indexer, split_covid_data_entry, split_covid_data
 
 
-def preprocess_training_collection(collection, max_txt_size=255):
+def preprocess_covid19_data(collection, max_txt_size=255, splice=True):
     """
     Takes in a list of dictionaries where each dictionary takes the form:
     {
@@ -59,12 +17,14 @@ def preprocess_training_collection(collection, max_txt_size=255):
     and max_txt_size which will set the size of your texts in collection to that size.
     It will return a list of encoded texts, a list of valid labels, and a word_index that maps a word to an encoded integer form
     """
+    if splice:
+        collection = split_covid_data(collection)
     np.random.shuffle(collection)
     labels = np.array([data['valid'] for data in collection], dtype=np.int32)
     texts =  [data['text'] for data in collection]
     word_dump = []
     for text in texts:
-        word_dump.extend(clean_txt(text))
+        word_dump.extend(listify_txt(text))
     word_index = word_indexer(word_dump)
     del word_dump
     encoded_txt = np.array([preprocess_txt(text, word_index, max_txt_size) for text in texts])
@@ -116,7 +76,7 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
     model.save(os.path.join(file_dir, "covid19_info_validator.h5"))
     return model
 
-def json_train(data_filepath=None, word_index_filename=None):
+def json_train(data_filepath=None, word_index_filename=None, splice=True):
     """
     trains neural network from a json data
     """
@@ -132,7 +92,7 @@ def json_train(data_filepath=None, word_index_filename=None):
 
     train_size = len(training_collection) - len(training_collection)//5
 
-    x_train, y_train, word_index = preprocess_training_collection(training_collection) # preprocess training collection
+    x_train, y_train, word_index = preprocess_covid19_data(training_collection, splice=splice) # preprocess training collection
     x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
 
     with open(word_index_filename, 'w') as f:
@@ -140,14 +100,15 @@ def json_train(data_filepath=None, word_index_filename=None):
 
     model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=20, validation_data=(x_val, y_val))
 
-def mongo_train():
+def mongo_train(splice=True):
     """
     trains neural network using mongodb data
     """
-    training_collection = list(mongo.db.traindata.find({}, {"_id": 0, "text": 1, "valid": 1}))
+    with mongo.db.traindata.find({}, {"_id": 0, "text": 1, "valid": 1}) as c:
+        training_collection = list(c)
     train_size = len(training_collection) - len(training_collection)//5
 
-    x_train, y_train, word_index = preprocess_training_collection(training_collection) # preprocess training collection
+    x_train, y_train, word_index = preprocess_covid19_data(training_collection, splice=splice) # preprocess training collection
     x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
 
     mongo.db.wordindex.drop()

@@ -4,15 +4,14 @@ from app.machine_learning.data.analyze import json_covid_valid_freq, mongo_covid
 import os
 
 def print_help():
-    print('\n\npython run.py ml action\n')
+    print('\n\npython run.py ml <action>\n')
     print('Actions:\n') 
-    print('\ttrain: trains a specific machine learning AI \n\t\tpython run.py ml train <AI> <storage method>')
+    print('\ttrain: trains a specific machine learning AI \n\t\tpython run.py ml train <AI> <storage method> [option]')
     print('\tcheck: tests a machine learning AI to see if it is functional\n\t\tpython run.py ml check <AI> <storage method>')
     print('\tdata: manage trainibg data\n\t\tpython run.py ml data <data_method> [option]')
     print('\t\tdata methods:')
     print('\t\t\tjson_mongo: sends json training data to a mongo database')
     print('\t\t\t\tpython run.py ml data json_mongo [option]')
-    print('\t\t\t\toptions:\n\t\t\t\t\t splice: splice training data if they are in a text form')
     print('\t\t\tcovid_freq: Checks frequency of validity values of the covid19 text validator\'s training data')
     print('\t\t\t\tpython run.py ml data covid_freq <storage method>')
     print('\t help: show help')
@@ -21,14 +20,15 @@ def print_help():
     print('storage methods:') 
     print('\tjson: data is stored using json')
     print('\tmongo: data is stored using mongodb')
+    print('options:') 
+    print('\t splice: splice data if they are in a text form')
 
-def execute(*args):
-    args = args[0]
+def execute(args):
     if len(args) == 0:
         print_help()
     elif args[0] == 'check':
         if args[1] == 'covid19':
-            if len(args) > 2:
+            if len(args) > 2:    
                 check.check_if_covid19_works(args[2])
             else:
                 check.check_if_covid19_works('')
@@ -36,8 +36,12 @@ def execute(*args):
             print('error: you must type a valid AI')
     elif args[0] == 'train':
         if args[1] == 'covid19':
+            if len(args) > 3:
+                    splice = args[3]
+            else:
+                splice = None
             if len(args) > 2:
-                train.train_covid19(args[2])
+                train.train_covid19(args[2], splice=splice)
             else:
                 train.train_covid19('')
         else:
