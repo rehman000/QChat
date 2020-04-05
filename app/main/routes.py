@@ -1,6 +1,6 @@
 from flask import render_template, request, Blueprint
 from app.models import Post
-from app.machine_learning.covid19 import validate_txt_json
+from app.machine_learning.covid19 import validate_txt
 
 main = Blueprint('main', __name__)
 
@@ -37,7 +37,7 @@ def home():                                                                     
     post_valid = posts.items
      
     for post in post_valid:
-        post.validity = validate_txt_json(post.content)
+        post.validity = validate_txt(post.content)
         # print(post)
     
     return render_template('home.html', posts=posts, post_valid=post_valid)                                                                

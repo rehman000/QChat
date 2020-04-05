@@ -2,55 +2,12 @@ import tensorflow as tf
 from tensorflow import keras
 import json
 from app import mongo
-from flask import Flask
 import numpy as np
 import os
-
-def word_indexer(word_lst: list):
-    """
-    takes in a list of words (i.e. strings without whitespacing and line breaks) and returns
-    an encoding mapping dictionary where the key is the word and the value is its encoded integer form.
-    In this encoding, 3 special keys exist:
-        '<PAD>'     : 0     represents padding
-        '<START>'   : 1     represents starting word
-        '<UNK>'     : 2     represents uknown word
-        '<UNUSED>'  : 3     represents unused word
-    """
-    unique_words = list(set(word_lst))
-    word_index = {}
-    for i in range(len(unique_words)):
-        word_index[unique_words[i].lower()] = i + 4
-    word_index['<PAD>'] = 0
-    word_index['<START>'] = 1
-    word_index['<UNK>'] = 2
-    word_index['<UNUSED>'] = 3
-    return word_index
-
-def reverse_word_index(word_index):
-    return dict([(word_index[word], word) for word in word_index])
-
-def clean_txt(txt):
-    """
-    Returns a list of words from string txt that removes unneeded characters and sets them all to be lowercases
-    """
-    return txt.replace(",", "").replace(".", "").replace("(", "").replace(")", "").replace(":", "").replace("\"", "").replace("\n", "").replace("\t", "").lower().strip().split(" ")
-
-def preprocess_txt(txt, word_index, max_txt_size=250):
-    """
-    preprocesses a string named txt into a list of encoded integers based on word_index whose index is a word and whose value is an encoded integer
-    """
-    wd_list = clean_txt(txt)
-    encoded = [1]
-    for word in wd_list:
-        if word in word_index:
-            encoded.append(word_index[word])
-        else:
-            encoded.append(word_index["<UNK>"]) 
-    encoded = keras.preprocessing.sequence.pad_sequences([encoded], value=word_index["<PAD>"], padding="post", maxlen=max_txt_size)[0]
-    return encoded
+from app.machine_learning.data.process import preprocess_txt, listify_txt, word_indexer, split_covid_data_entry, split_covid_data
 
 
-def preprocess_training_collection(collection, max_txt_size=250):
+def preprocess_covid19_data(collection, max_txt_size=255, splice=True):
     """
     Takes in a list of dictionaries where each dictionary takes the form:
     {
@@ -60,11 +17,14 @@ def preprocess_training_collection(collection, max_txt_size=250):
     and max_txt_size which will set the size of your texts in collection to that size.
     It will return a list of encoded texts, a list of valid labels, and a word_index that maps a word to an encoded integer form
     """
+    if splice:
+        collection = split_covid_data(collection)
+    np.random.shuffle(collection)
     labels = np.array([data['valid'] for data in collection], dtype=np.int32)
     texts =  [data['text'] for data in collection]
     word_dump = []
     for text in texts:
-        word_dump.extend(clean_txt(text))
+        word_dump.extend(listify_txt(text))
     word_index = word_indexer(word_dump)
     del word_dump
     encoded_txt = np.array([preprocess_txt(text, word_index, max_txt_size) for text in texts])
@@ -77,6 +37,7 @@ def train_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=7, ba
     model = keras.Sequential()
     model.add(keras.layers.Embedding(embeding_dim[0],embeding_dim[1]))
     model.add(keras.layers.GlobalAveragePooling1D())
+    model.add(keras.layers.Dense(64,activation="relu"))
     model.add(keras.layers.Dense(16,activation="relu"))
     model.add(keras.layers.Dense(3,activation="softmax"))
 
@@ -89,28 +50,70 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
     """
     trains neural network with training data and saves it
     """
-    model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
+    if validation_data == None:
+        print('no validation data added')
+        model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
+    else:
+        max_accuracy = 0
+        average_accuracy = 0
+        model = None
+        for i in range(10):
+            print(f'Beggining to train the {i+1}th model')
+            new_model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
+            accuracy = new_model.evaluate(validation_data[0], validation_data[1])[1]
+            print(f'Finished training {i+1}th model with validation accuracy {accuracy}')
+
+            average_accuracy = (i*average_accuracy + accuracy)/(i+1)
+            if accuracy > max_accuracy:
+                model = new_model
+                max_accuracy = accuracy
+                print(f'More accurate model chosen.\nChosen model\'s validation Accuracy: {max_accuracy}')
+            else:
+                print('Model not accurate enough, model discarded ... ')
+        print(f'the average accuracy of all models is {average_accuracy}')
+        print(f'Will now save model with validation accuracy: {max_accuracy}')
     file_dir = os.path.dirname(os.path.abspath(__file__))
     model.save(os.path.join(file_dir, "covid19_info_validator.h5"))
     return model
 
-def json_train(data_filepath=None, word_index_filename='dummy_word_decode.json'):
+def json_train(data_filepath=None, word_index_filename=None, splice=True):
     """
     trains neural network from a json data
     """
-    if data_filepath == None:
-        file_dir = os.path.dirname(os.path.abspath(__file__))
-        data_filepath = os.path.join(file_dir, 'dummy_text_data.json')
+    file_dir = os.path.dirname(os.path.abspath(__file__))
+    if data_filepath == None:        
+        data_filepath = os.path.join(file_dir, 'data', 'text_data.json')
+
+    if word_index_filename == None:
+        word_index_filename = os.path.join(file_dir, 'data', 'word_decode.json')
 
     with open(data_filepath) as f: 
         training_collection = json.load(f) # get training collection
 
-    x_train, y_train, word_index = preprocess_training_collection(training_collection) # preprocess training collection
+    train_size = len(training_collection) - len(training_collection)//5
 
-    with open(os.path.join(file_dir, word_index_filename), 'w') as f:
+    x_train, y_train, word_index = preprocess_covid19_data(training_collection, splice=splice) # preprocess training collection
+    x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
+
+    with open(word_index_filename, 'w') as f:
         json.dump(word_index, f) # store word index
 
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=40)
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=20, validation_data=(x_val, y_val))
+
+def mongo_train(splice=True):
+    """
+    trains neural network using mongodb data
+    """
+    with mongo.db.covid19TextData.find({}, {"_id": 0, "text": 1, "valid": 1}) as c:
+        training_collection = list(c)
+    train_size = len(training_collection) - len(training_collection)//5
+
+    x_train, y_train, word_index = preprocess_covid19_data(training_collection, splice=splice) # preprocess training collection
+    x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
+
+    mongo.db.wordIndex.drop()
+    mongo.db.wordIndex.insert_one(word_index)
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 32), epochs=20, validation_data=(x_val, y_val))
 
 def validate_txt_with_index(txt, word_index, model=None):
     """
@@ -123,21 +126,15 @@ def validate_txt_with_index(txt, word_index, model=None):
     You can also optionally pass a model which represents a keras neural network instead of the function loading
     a pre-existing neural network
     """
-    if model==None:
+    if not model:
         file_dir = os.path.dirname(os.path.abspath(__file__))
         model = keras.models.load_model(os.path.join(file_dir, "covid19_info_validator.h5"))
-
+        
     encoded = preprocess_txt(txt, word_index=word_index)
     prediction = model.predict(np.array([encoded], dtype=np.int32))[0] # a numoy of int33 datatype is only permitted
     return np.argmax(prediction)    
 
-def mongo_train():
-    """
-    trains neural network using mongodb data
-    """
-    pass
-
-def validate_txt_json(txt, word_index_filename=None, model=None):
+def validate_txt_json(txt, word_index_filepath=None, model=None):
     """
     Takes in text and the filename of word index json file and returns an integer determining if a text provides valid information 
     or misinformation about the COVID-19 virus.
@@ -149,9 +146,9 @@ def validate_txt_json(txt, word_index_filename=None, model=None):
     a pre-existing neural network
     """
     file_dir = os.path.dirname(os.path.abspath(__file__))
-    if word_index_filename==None:
-        word_index_filename = 'dummy_word_decode.json'
-    with open(os.path.join(file_dir, word_index_filename)) as f:
+    if word_index_filepath==None:
+        word_index_filepath = os.path.join(file_dir, 'data' + os.sep + 'word_decode.json')
+    with open(word_index_filepath) as f:
         word_index = json.load(f)
     return validate_txt_with_index(txt, word_index, model=model)
 
@@ -167,7 +164,8 @@ def validate_txt_mongo(txt, model=None):
     You can also optionally pass a model which represents a keras neural network instead of the function loading
     a pre-existing neural network.
     """
-    return 1
+    word_index = mongo.db.wordIndex.find_one()
+    return validate_txt_with_index(txt, word_index, model=model)
 
 def validate_txt(txt, use_json=False, model=False):
     """

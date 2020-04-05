@@ -29,6 +29,10 @@ def create_app(config_class=Config):
     bcrypt.init_app(app)
     login_manager.init_app(app)
     mail.init_app(app)
+
+    with app.app_context(): # should handle database migrations
+        from .models import database_migrate      
+        database_migrate()
     
     from app.users.routes import users                  # Now that we're using Blueprints the import needs to be altered! 
     from app.posts.routes import posts
