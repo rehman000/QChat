@@ -130,7 +130,12 @@ Or else it will not work. Google by default disables this feature, since most pe
 This is mostly to allow developers to debug their applications, before deploying it to any cloud service.
 
 # The following command: 
-will send the training data to your mongodb database
+will upgrade your SQL database
+    
+    flask db upgrade
+
+# To store your training data into mongodb: 
+this command will copy data from your locally stored json file into a mongodb database
     
     python run.py ml data json_mongo 
 
