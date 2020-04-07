@@ -142,7 +142,7 @@ this command will copy data from your locally stored json file into a mongodb da
 # To create a neural network: 
 this command will create a neural network using mongodb data:
     
-    python run.py ml train covid19 mongo 
+    python run.py ml train covid19 mongo splice
 
 # To start the application: 
 In the QChat Directory run the following command:
