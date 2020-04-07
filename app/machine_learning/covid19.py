@@ -98,7 +98,7 @@ def json_train(data_filepath=None, word_index_filename=None, splice=True):
     with open(word_index_filename, 'w') as f:
         json.dump(word_index, f) # store word index
 
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=20, validation_data=(x_val, y_val))
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=25, validation_data=(x_val, y_val))
 
 def mongo_train(splice=True):
     """
@@ -113,7 +113,7 @@ def mongo_train(splice=True):
 
     mongo.db.wordIndex.drop()
     mongo.db.wordIndex.insert_one(word_index)
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 32), epochs=20, validation_data=(x_val, y_val))
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 32), epochs=25, validation_data=(x_val, y_val))
 
 def validate_txt_with_index(txt, word_index, model=None):
     """

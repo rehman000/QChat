@@ -1,5 +1,8 @@
 from tensorflow import keras
 
+def _punctuation():
+    return [',', '.', ')', '(', '!', '?', ':', '"', '\n', '\t', '$']
+
 def split_covid_data_entry(entry, word_count=255):
     """
     splits a data entry from the covid-19 text classification data set into a list of data entries where each of its
@@ -8,14 +11,16 @@ def split_covid_data_entry(entry, word_count=255):
     """
     valid = entry['valid']
     text = entry['text']
+
     new_data = []
-    while text != '':
-        if len(text) < word_count and 0 < len(text):
-            new_data.append({'text': text, 'valid': valid})
-            text = ''
+    text_list = listify_txt(text)
+    while text_list != []:
+        if len(text_list) < word_count and 0 < len(text_list):
+            new_data.append({'text': " ".join(text_list), 'valid': valid})
+            text_list = []
         else:
-            new_data.append({'text': text[:word_count], 'valid': valid})
-            text = text[word_count:]
+            new_data.append({'text': " ".join(text_list[:word_count]), 'valid': valid})
+            text_list = text_list[word_count:]
     return new_data
 
 def split_covid_data(collection, word_count=255):
@@ -55,7 +60,8 @@ def listify_txt(txt):
     """
     Returns a list of words from string txt and sets all letters to be lowercase
     """
-    return txt.replace(",", " , ").replace(".", " _period_ ").replace("(", " ( ").replace(")", " ) ").replace("!", " _explanation_mark_ ").replace("?", " _question_mark_ ").replace(":", " : ").replace("\"", " \" ").replace("\n", "").replace("\t", "").replace("$", "dollar_").replace("_id", "_iid").lower().strip().split(" ")
+    text_list = txt.replace(",", " , ").replace(".", " _period_ ").replace("(", " ( ").replace(")", " ) ").replace("!", " _explanation_mark_ ").replace("?", " _question_mark_ ").replace(":", " : ").replace("\"", " \" ").replace("\n", "").replace("\t", "").replace("$", "dollar_").replace("_id", "_iid").lower().strip().split(" ")
+    return list(filter(lambda elem: elem != "", text_list))
 
 def preprocess_txt(txt, word_index, max_txt_size=255):
     """
