@@ -15,7 +15,7 @@ if __name__ == "__main__":
 	elif argv[1] == 'help':
 		print('\n\npython run.py <subject> <command>\n')
 		print('Subjects\n') 
-		print('\t ml: executes machine learning related tasks \n\n\t\tpython run.py ml <action>\n')
+		print('\t ml: executes machine learning related tasks \n\n\t\tpython run.py ml <action>\n\n\t\tTo get help type: python run.py ml help\n')
 		print('\t help: show help\n')
 	else:
 		print('invalid parameter')
