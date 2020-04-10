@@ -8,7 +8,7 @@ app = create_app()						# Create instance of app, this is using the Config class
 
 if __name__ == "__main__":
 	if len(argv) == 1:
-		app.run(debug=True) 
+		app.run(debug = app.config['FLASK_ENV'] != 'production') 
 	elif argv[1] == 'ml':
 		from app.machine_learning import execute
 		execute.execute(argv[2:])
