@@ -1,30 +1,32 @@
 {% extends "template.html" %}
 
 {% block content %}
-    <div class="content-section">
-        <h1>About Us: </h1>
-        <hr>
-        <p>QChat is a social media application where users can log in, create, update, and delete their posts. They can upload their own profile images, and communicate with one another, to share information, resources, and jobs listings during the COVID-19 pandemic, without having to worry about misinformation related to COVID-19. </p>
-    </div>
-    <div class="content-section">
-        <img class="img-fluid" src="{{url_for('static', filename='Covid-19.png' )}}">
-    </div>
-    <h1> Team: </h1>
-    <div class="content-section">
-        <h2>Oren Ben-Meir</h2>
-        <hr>
-        <p>Worked on the back end. Built a neural network using tensorflow to verify a post and check if it's misinformation. Gathered data using with the aid of web scraping and preprocessed it to train the neural network. Integrated mongodb and used it to store training data and data processing information to aid the neural network</p>
-        <hr>
-        <a href="https://orenben-meir.github.io/">Portfolio:</a>  
-        <a href="https://github.com/OrenBen-Meir"><img class="img-fluid" width="50" height="50" src="{{url_for('static', filename='GitHub.png' )}}"></a> 
-    </div>
-    <div class="content-section">
-        <h2>Rehman Arshad</h2>
-        <hr>
-        <p>Worked on the Back-end and the Front-end. Implemented all the CRUD methods, for creating posts, updating posts, deleting posts, set up the database schema/models and worked on the template files in flask. The UI/UX Design was done using CSS, and Bootstrap. Learned how to use BeautifulSoup4 for web scraping.</p>
-        <hr>
-        <a href="https://rehman000.github.io/">Portfolio:</a> 
-        <a href="https://github.com/rehman000"><img class="img-fluid" width="50" height="50" src="{{url_for('static', filename='GitHub.png' )}}"></a> 
+    <div class="mt-4">
+        <div class="content-section">
+            <h1>About Us: </h1>
+            <hr>
+            <p>QChat is a social media application where users can log in, create, update, and delete their posts. They can upload their own profile images, and communicate with one another, to share information, resources, and jobs listings during the COVID-19 pandemic, without having to worry about misinformation related to COVID-19. </p>
+        </div>
+        <div class="content-section">
+            <img class="img-fluid" src="{{url_for('static', filename='Covid-19.png' )}}">
+        </div>
+        <h1> Team: </h1>
+        <div class="content-section">
+            <h2>Oren Ben-Meir</h2>
+            <hr>
+            <p>Worked on the back end. Built a neural network using tensorflow to verify a post and check if it's misinformation. Gathered data using with the aid of web scraping and preprocessed it to train the neural network. Integrated mongodb and used it to store training data and data processing information to aid the neural network</p>
+            <hr>
+            <a href="https://orenben-meir.github.io/">Portfolio:</a>  
+            <a href="https://github.com/OrenBen-Meir"><img class="img-fluid" width="50" height="50" src="{{url_for('static', filename='GitHub.png' )}}"></a> 
+        </div>
+        <div class="content-section">
+            <h2>Rehman Arshad</h2>
+            <hr>
+            <p>Worked on the Back-end and the Front-end. Implemented all the CRUD methods, for creating posts, updating posts, deleting posts, set up the database schema/models and worked on the template files in flask. The UI/UX Design was done using CSS, and Bootstrap. Learned how to use BeautifulSoup4 for web scraping.</p>
+            <hr>
+            <a href="https://rehman000.github.io/">Portfolio:</a> 
+            <a href="https://github.com/rehman000"><img class="img-fluid" width="50" height="50" src="{{url_for('static', filename='GitHub.png' )}}"></a> 
+        </div>
     </div>
 
     {% endblock content %}
