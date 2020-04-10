@@ -57,7 +57,7 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
         max_accuracy = 0
         average_accuracy = 0
         model = None
-        for i in range(10):
+        for i in range(15):
             print(f'Beggining to train the {i+1}th model')
             new_model = train_info_validator(x_train, y_train, embeding_dim=embeding_dim, epochs=epochs, batch_size=batch_size, validation_data=validation_data)
             accuracy = new_model.evaluate(validation_data[0], validation_data[1])[1]
