@@ -99,6 +99,8 @@ def json_train(data_filepath=None, word_index_filename=None, splice=True):
         json.dump(word_index, f) # store word index
 
     model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=24, validation_data=(x_val, y_val))
+    
+    tf.keras.backend.clear_session() # deallocates memory to prevent memory leak
 
 def mongo_train(splice=True):
     """
@@ -114,6 +116,8 @@ def mongo_train(splice=True):
     mongo.db.wordIndex.drop()
     mongo.db.wordIndex.insert_one(word_index)
     model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 32), epochs=24, validation_data=(x_val, y_val))
+    
+    tf.keras.backend.clear_session() # deallocates memory to prevent memory leak
 
 def validate_txt_with_index(txt, word_index, model=None):
     """
@@ -132,6 +136,7 @@ def validate_txt_with_index(txt, word_index, model=None):
         
     encoded = preprocess_txt(txt, word_index=word_index)
     prediction = model.predict(np.array([encoded], dtype=np.int32))[0] # a numoy of int33 datatype is only permitted
+    keras.backend.clear_session() # deallocates resources to prevent a memory leak
     return np.argmax(prediction)    
 
 def validate_txt_json(txt, word_index_filepath=None, model=None):
