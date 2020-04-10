@@ -71,7 +71,7 @@ def account():
     elif request.method == 'GET':
         form.username.data = current_user.username                                          # This populates the username field upon a 'GET' request
         form.email.data = current_user.email                                                # This populates the email field upon a 'GET' request
-    image_file = url_for('static', filename='profile_images/' + current_user.image_file)
+    image_file = current_user.image_file
     return render_template('account.html', title='Account', image_file=image_file, form=form)
 
 

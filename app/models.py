@@ -6,7 +6,7 @@ from flask_login import UserMixin                                               
 from flask_migrate import Migrate
 
 def database_migrate():                                                             # This is to migrate changes in our models to our database
-    migrate = Migrate(current_app, db)
+    migrate = Migrate(current_app, db, compare_type=True)
 
 
 @login_manager.user_loader 
@@ -30,7 +30,7 @@ class User(db.Model, UserMixin):
     id = db.Column(db.Integer, primary_key=True)                                    # Primary Key
     username = db.Column(db.String(20), unique=True, nullable=False)                # Each User will have a username, with a max(20) characters, it must be unique, and Null is not allowed!
     email = db.Column(db.String(120), unique=True, nullable=False)                  # Each User will have an email, with a max(120) characters, it must be unique, and Null is not allowed!
-    image_file = db.Column(db.String(20), nullable=False, default='default.jpg')    # Each User will have a defualt profile Image, so uniqueness does not apply, since Null is not allowed! 
+    image_file = db.Column(db.String(2083), nullable=False, default='default.jpg')    # Each User will have a defualt profile Image, so uniqueness does not apply, since Null is not allowed! 
     password = db.Column(db.String(60), nullable=False)                             # Each User will have passwords, with a max(60) characters, uniqueness does not apply, and Null is not allowed!
     posts = db.relationship('Post', backref='author', lazy=True)                    # This is linked to Posts, Lazy Evaluation is set to: True
 

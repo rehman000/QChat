@@ -93,7 +93,8 @@ QChat is a social media application where users can log in, create, update, and 
 ```
 
 # To execute our app, 
-- you will need python3.6 or greater, mongodb and pip.
+- you will need python3.6 or greater, mongodb, and pip.
+- Optionally you may want a cloudinary account if you intend to use cloud storage for file uploads. Without it, all uploads will be stored locally. You can set up your cloudinary API here: <https://cloudinary.com/>
 
 To run the app:
 
@@ -108,12 +109,18 @@ To run the app:
 These are the following enviornmental path variables:
 
         export SECRET_KEY="mysecretkey"
+        export CLOUDINARY_CLOUD_NAME="<your cloudinary cloud name>"
+        export CLOUDINARY_API_KEY="<your cloudinary API Key>"
+        export CLOUDINARY_API_SECRET="<your cloudinary API secret>"
         export SQLALCHEMY_DATABASE_URI="sqlite:///database.db"
         export MONGO_URI="mongodb://localhost:27017/myDatabase"
         export MAIL_USERNAME="<an email adress>"
         export MAIL_PASSWORD="<a password for that email address>"
 
 #### Information about the environment variables
+* CLOUDINARY_CLOUD_NAME represents a cloudinary cloud name
+* CLOUDINARY_API_KEY represents a cloudinary API key
+* CLOUDINARY_API_SECRET represents a cloudinary API secret
 * SQLALCHEMY_DATABASE_URI represents the url to an SQL database
 * MONGO_URI represents the url to a mongodb database
 * SECRET_KEY represents your secret key
