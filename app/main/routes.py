@@ -39,7 +39,7 @@ def home():                                                                     
     for post in post_valid:
         post.validity = validate_txt(post.content)
         # print(post)
-    
+    print(request.url)
     return render_template('home.html', posts=posts, post_valid=post_valid)                                                                
 
 
