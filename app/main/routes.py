@@ -45,6 +45,6 @@ def home():                                                                     
 
 @main.route('/about')
 def about():
-    print(request.url)
+    print('REQUEST URL:' request.url)
     return render_template('about.html', title='About us')
 
