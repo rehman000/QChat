@@ -16,7 +16,7 @@ def isCloudSinarySetUp():
 
 def save_cloud(form_picture, image_res = (125, 125)):                                    
     upload_result = upload(form_picture)
-    img_url, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill", width=image_res[0], height=image_res[1]) 
+    img_url, options = cloudinary_url(upload_result['public_id'], format="jpg", crop="fill", width=image_res[0], height=image_res[1], secure=True) 
     return img_url
 
 def save_static(form_picture, image_res = (125, 125)):
