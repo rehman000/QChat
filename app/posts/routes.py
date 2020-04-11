@@ -3,6 +3,7 @@ from flask_login import current_user, login_required
 from app import db
 from app.models import Post
 from app.posts.forms import PostForm
+from app.utils import url_for_secure
 
 
 posts = Blueprint('posts', __name__)
@@ -20,7 +21,8 @@ def new_post():
         db.session.add(post)                                                                        # Mark this 'post' to be added to the database
         db.session.commit()                                                                         # Commit changes to db
         flash('Your post has been created!', 'success')                                             # Display success message! For anyone wondering 'success' is just a bootstrap class, it gives a green-ish hue.
-        return redirect(url_for('main.home'))                                                       # Redirect to Home page
+        
+        return redirect(url_for_secure('main.home'))                                                       # Redirect to Home page
     
     return render_template('create_post.html', title='New Post', form=form, legend='New Post')
 
@@ -48,7 +50,7 @@ def update_post(post_id):
         db.session.commit()                                                 # Commit changes to db! 
                                                                             # We do not need to add anything into the db, these objects are already in the db and being overwritten!
         flash('Your post has been successfully updated!', 'success')        # Display success message. For anyone wondering 'success' is a bootstrap class it gives a green-ish hue.
-        return redirect(url_for('posts.post', post_id=post.id))             # Redirect to the post/id page
+        return redirect(url_for_secure('posts.post', post_id=post.id))             # Redirect to the post/id page
     if request.method == 'GET':
         form.title.data = post.title                                        # This ensures that the fields are populated with the previous text! But only if it's a 'GET' request.
         form.content.data = post.content                                    # This ensures that the fields are populated with the previous text! But only if it's a 'GET' request.
@@ -67,5 +69,5 @@ def delete_post(post_id):
     db.session.delete(post)                                                 # Mark post for deletion in db
     db.session.commit()                                                     # Commit changes to db!
     flash('Your post has been successfully deleted!', 'success')            # Display success message. For anyone wondering 'success' is a bootstrap class it gives a green-ish hue.
-    return redirect(url_for('main.home'))                                   # Redirect to the Home page
+    return redirect(url_for_secure('main.home'))                                   # Redirect to the Home page
 

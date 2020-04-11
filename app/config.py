@@ -2,6 +2,7 @@ import os
 
 
 class Config:
+    DOMAIN = "qchat.social"
     FLASK_ENV = os.environ.get('FLASK_ENV')
     CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
     CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')

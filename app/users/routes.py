@@ -4,6 +4,7 @@ from app import db, bcrypt
 from app.models import User, Post
 from app.users.forms import (RegistrationForm, LoginForm, UpdateAccountForm, RequestResetForm, ResetPasswordForm)
 from app.users.utils import save_picture, send_reset_email
+from app.utils import url_for_secure
 
 
 users = Blueprint('users', __name__)                            # Blueprints 
@@ -12,7 +13,7 @@ users = Blueprint('users', __name__)                            # Blueprints
 @users.route('/register', methods=['GET', 'POST'])
 def register():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for_secure('main.home'))
     form = RegistrationForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')                              # decode('utf-8'), gives us a String instead of byte codes, hashing the plain-text password from user input in the forms, and storing it in a variable
@@ -20,7 +21,7 @@ def register():
         db.session.add(user)                                                                                             # Add user to the database.db
         db.session.commit()                                                                                              # Commit changes in database.db
         flash(f'Welcome {form.username.data}! Your account has been created! You are now able to log in!', 'success')    # Display success message! For anyone wondering 'success' is just a bootstrap class, it gives a green-ish hue. 
-        return redirect( url_for('users.login') )                                                                        # Redirect to Login page
+        return redirect( url_for_secure('users.login') )                                                                        # Redirect to Login page
 
     return render_template('register.html', title='Register', form=form)
 
@@ -29,14 +30,14 @@ def register():
 @users.route('/login', methods=['GET', 'POST'])
 def login():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))                                               # Redirect to home page -- Prevent's already logged in user's from logging in again! 
+        return redirect(url_for_secure('main.home'))                                               # Redirect to home page -- Prevent's already logged in user's from logging in again! 
     form = LoginForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()                          # Look for user email in db, and stre it 
         if user and bcrypt.check_password_hash(user.password, form.password.data):          # If the provided email exists AND Password Hash matches with user input from the form
             login_user(user, remember=form.remember.data)                                   # login_user is part of flask_login, and like UserMixin it's really useful, it accepts two paramters, the user object, and the remember form data which is a boolean
             next_page = request.args.get('next')                                            # using .get prevents us from getting a null pointer exception
-            return redirect(next_page) if next_page else redirect(url_for('main.home'))     # If the next page exists redirect to the next page, if it doesn't exist redirect to Home page
+            return redirect(next_page) if next_page else redirect(url_for_secure('main.home'))     # If the next page exists redirect to the next page, if it doesn't exist redirect to Home page
         else:
             flash('Login Unsuccessful. Please check username and password', 'danger')       # For anyone wondering 'danger' is just a bootstrap class, it gives a red-ish/pink-ish hue for an error message                           
     return render_template('login.html', title='Login', form=form)
@@ -46,7 +47,7 @@ def login():
 @users.route('/logout')
 def logout():                                                                               # The logout function is pretty simple it uses the flask-login method, and redirects the user to the home page as a Guest User
     logout_user()                                                                           # logout_user is part of flask-login, and like UserMixin it's reallu useful, it implicitly knows who's logged in, and does not accept any parameters!
-    return redirect(url_for('main.home'))                                                   # Redirect to Home page 
+    return redirect(url_for_secure('main.home'))                                                   # Redirect to Home page 
 
     # Confession time: In some of my projects I would log people out by redirecting them to the log in page! 
     # This is VERY VERY insecure, and dumb as your not actually deleting their cookies and ending there session! O_O 
@@ -67,7 +68,7 @@ def account():
         current_user.email = form.email.data                                                # So over here we're overwriting the current_user email with the email the user submits in the form!
         db.session.commit()                                                                 # Commit changes in database.db
         flash('Your account has been updated!', 'success')                                  # Display success message! For anyone wondering 'success' is just a bootstrap class, it gives a green-ish hue.
-        return redirect(url_for('users.account'))                                           # Redirect to account, without this line of code, the broswer on the redirect below would send multiple post requests causing some problems
+        return redirect(url_for_secure('users.account'))                                           # Redirect to account, without this line of code, the broswer on the redirect below would send multiple post requests causing some problems
     elif request.method == 'GET':
         form.username.data = current_user.username                                          # This populates the username field upon a 'GET' request
         form.email.data = current_user.email                                                # This populates the email field upon a 'GET' request
@@ -91,30 +92,30 @@ def user_posts(username):
 @users.route("/reset_password", methods=['GET', 'POST'])
 def reset_request():
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for_secure('main.home'))
     form = RequestResetForm()
     if form.validate_on_submit():
         user = User.query.filter_by(email=form.email.data).first()
         send_reset_email(user)
         flash('An email has been sent with instructions to reset your password.', 'info')
-        return redirect(url_for('users.login'))
+        return redirect(url_for_secure('users.login'))
     return render_template('reset_request.html', title='Reset Password', form=form)
 
 
 @users.route("/reset_password/<token>", methods=['GET', 'POST'])
 def reset_token(token):
     if current_user.is_authenticated:
-        return redirect(url_for('main.home'))
+        return redirect(url_for_secure('main.home'))
     user = User.verify_reset_token(token)
     if user is None:
         flash('That is an invalid or expired token', 'warning')
-        return redirect(url_for('users.reset_request'))
+        return redirect(url_for_secure('users.reset_request'))
     form = ResetPasswordForm()
     if form.validate_on_submit():
         hashed_password = bcrypt.generate_password_hash(form.password.data).decode('utf-8')
         user.password = hashed_password
         db.session.commit()
         flash('Your password has been updated! You are now able to log in', 'success')
-        return redirect(url_for('users.login'))
+        return redirect(url_for_secure('users.login'))
     return render_template('reset_token.html', title='Reset Password', form=form)
     

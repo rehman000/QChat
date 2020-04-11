@@ -1,5 +1,6 @@
 from sys import argv					# Imports arguments to the app
 from app import create_app          	# The app variable is created in the package, file __init__.py
+from app.utils import inProduction
 										# Since app is no longer accessible it's out of scope we need 
 										# to create an instance of app, so let's import the create_app() function from __init__.py 
 
