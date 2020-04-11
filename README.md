@@ -1,5 +1,8 @@
-# QChat
+# QChat 
+
 QChat is a social media application where users can log in, create, update, and delete their posts. They can upload their own profile images, and communicate with one another, to share information, resources, and jobs listings during the COVID-19 pandemic. The information on each post is validated for it's accuracy using a neural network to prevent misinformation regarding COVID-19 from spreading rampant on the platform. 
+
+### Try out our app!! <https://www.qchat.social/>
 
 # The File Structure is as follows:
 
