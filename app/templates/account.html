@@ -12,7 +12,7 @@
 
         <!-- FORM STARTS HERE -->
 
-        <form method="POST" action="" enctype="multipart/form-data">            <!-- enctype stands for encoding type, multipart/form-data will allow us to not onlu process text ('utf-8'), but also image files ('jpg', 'png') -->
+        <form method="POST" action="{{ request.url }}" enctype="multipart/form-data">            <!-- enctype stands for encoding type, multipart/form-data will allow us to not onlu process text ('utf-8'), but also image files ('jpg', 'png') -->
             {{ form.hidden_tag() }}
             <fieldset class="form-group">
                 <legend class="border-bottom mb-4">Account Info</legend>
