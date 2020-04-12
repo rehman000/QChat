@@ -1,7 +1,5 @@
 from tensorflow import keras
-
-def _punctuation():
-    return [',', '.', ')', '(', '!', '?', ':', '"', '\n', '\t', '$']
+import string  
 
 def split_covid_data_entry(entry, word_count=255):
     """
@@ -60,7 +58,15 @@ def listify_txt(txt):
     """
     Returns a list of words from string txt and sets all letters to be lowercase
     """
-    text_list = txt.replace(",", " , ").replace(".", " _period_ ").replace("(", " ( ").replace(")", " ) ").replace("!", " _explanation_mark_ ").replace("?", " _question_mark_ ").replace(":", " : ").replace("\"", " \" ").replace("\n", "").replace("\t", "").replace("$", "dollar_").replace("_id", "_iid").lower().strip().split(" ")
+    Replacements = [ 
+        ("!", " _explanation_mark_ "), ("?", " _question_mark_ "), ("“", "\""), ("’", " ’ "),
+        ("\n", ""), ("\t", ""), ("$", " _dollar_ "), ("_id", "_iid"), ("'", " ' "), (".", " _period_ ")
+    ]
+    for replacement in Replacements:
+        txt = txt.replace(replacement[0], replacement[1])
+    for punctuation in string.punctuation:
+        txt = txt.replace(punctuation, " "+punctuation+" ")
+    text_list = txt.lower().strip().split(" ")
     return list(filter(lambda elem: elem != "", text_list))
 
 def preprocess_txt(txt, word_index, max_txt_size=255):

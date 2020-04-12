@@ -73,7 +73,7 @@ def train_save_info_validator(x_train, y_train, embeding_dim=(88000,16), epochs=
         print(f'the average accuracy of all models is {average_accuracy}')
         print(f'Will now save model with validation accuracy: {max_accuracy}')
     file_dir = os.path.dirname(os.path.abspath(__file__))
-    model.save(os.path.join(file_dir, "covid19_info_validator.h5"))
+    model.save(os.path.join(file_dir, "covid19_info_validator.h5"), include_optimizer=False)
     return model
 
 def json_train(data_filepath=None, word_index_filename=None, splice=True):
@@ -98,7 +98,7 @@ def json_train(data_filepath=None, word_index_filename=None, splice=True):
     with open(word_index_filename, 'w') as f:
         json.dump(word_index, f) # store word index
 
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=24, validation_data=(x_val, y_val))
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 16), epochs=23, validation_data=(x_val, y_val))
     
     # clear resources
     del model
@@ -110,14 +110,14 @@ def mongo_train(splice=True):
     """
     with mongo.db.covid19TextData.find({}, {"_id": 0, "text": 1, "valid": 1}) as c:
         training_collection = list(c)
-    train_size = len(training_collection) - len(training_collection)//5
+    train_size = len(training_collection) - len(training_collection)//10
 
     x_train, y_train, word_index = preprocess_covid19_data(training_collection, splice=splice) # preprocess training collection
     x_train, y_train, x_val, y_val = x_train[:train_size], y_train[:train_size], x_train[train_size:], y_train[train_size:]
 
     mongo.db.wordIndex.drop()
     mongo.db.wordIndex.insert_one(word_index)
-    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 32), epochs=24, validation_data=(x_val, y_val))
+    model = train_save_info_validator(x_train, y_train, embeding_dim=(len(word_index), 32), epochs=23, validation_data=(x_val, y_val))
     
     # clear resources
     del model
