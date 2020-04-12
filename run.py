@@ -20,3 +20,6 @@ if __name__ == "__main__":
 		print('\t help: show help\n')
 	else:
 		print('invalid parameter')
+else:
+	application = app
+
