@@ -3,7 +3,7 @@ import os
 
 class Config:
     DOMAIN = "qchat.social"
-    app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False                    # prevents SQL alchemy FSADeprecationWarning warning
+    SQLALCHEMY_TRACK_MODIFICATIONS = False                                  # prevents SQL alchemy FSADeprecationWarning warning
     FLASK_ENV = os.environ.get('FLASK_ENV')
     CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
     CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')
