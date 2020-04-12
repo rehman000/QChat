@@ -206,9 +206,9 @@ And install the QChat.apk file by following the instructions on your device.
 
 # Permissons:
 This application requests the following permissions:
-    
-    Internet
+
+-- Internet and nothing else 
     
     <uses-permission android:name="android.permission.INTERNET"></uses-permission>
     
-nothing else 
+
