@@ -1,9 +1,17 @@
+import os
+from app.utils import inProduction
+
+try:
+    if inProduction():
+        os.environ['TF_CPP_MIN_LOG_LEVEL'] = '1' # disable info logging in tensorflow while in a production environment
+except RuntimeError:
+    pass
+
 import tensorflow as tf
 from tensorflow import keras
 import json
 from app import mongo
 import numpy as np
-import os
 from app.machine_learning.data.process import preprocess_txt, listify_txt, word_indexer, split_covid_data_entry, split_covid_data
 
 
@@ -136,7 +144,7 @@ def validate_txt_with_index(txt, word_index, model=None):
     """
     if not model:
         file_dir = os.path.dirname(os.path.abspath(__file__))
-        model = keras.models.load_model(os.path.join(file_dir, "covid19_info_validator.h5"))
+        model = keras.models.load_model(os.path.join(file_dir, "covid19_info_validator.h5"), compile=False)
         
     encoded = preprocess_txt(txt, word_index=word_index)
     prediction = model.predict(np.array([encoded], dtype=np.int32))[0] # a numoy of int33 datatype is only permitted
