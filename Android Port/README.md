@@ -195,3 +195,20 @@ The file Structure for the QChat Android app is as follows:
         └───wrapper
 
 ```
+
+# Installation:
+
+To install and run the app on your respective Android Device go to the following directory:
+
+    Executable APK 
+
+And install the QChat.apk file by following the instructions on your device. 
+
+# Permissons:
+This application requests the following permissions:
+    
+    Internet
+    
+    <uses-permission android:name="android.permission.INTERNET"></uses-permission>
+    
+nothing else 
