@@ -1,5 +1,7 @@
 # QChat - Android
 
+The file Structure for the QChat Android app is as follows: 
+
 ```
 ├───Executable APK
 └───QChat
