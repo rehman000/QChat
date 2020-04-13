@@ -19,7 +19,7 @@ function redirectHTTPS() {
 urlTest = {
     httpURL: "http://google.com", httpsURL: "https://google.com", domainUrl: "google.com",
     logTestResult(isSuccess) {
-        /* Taketests in a boolean value of if a test is successful and logs the information*/
+        /* Take in a boolean value that indicates if a test is successful and logs the information*/
         if(isSuccess) {
             console.log("Test success!!")
         } else {
