@@ -1,0 +1,42 @@
+{% extends "template.html" %}
+
+{% block content %}
+<!-- This jinja template is meant to act as a base line for other jinja templates to use for data visualization -->
+
+<!-- Insert visualization content here -->
+<h1>Insert data visualization here</h1>
+{% endblock content %}
+
+{% block foot %}
+<!-- import your scripts heere-->
+
+<script src="{{ url_for('static', filename='scripts/data-parse.js') }}"></script> <!-- retrieves library for parsing csv strings -->
+<script>
+
+    dataUrls = {
+        stateLevelUrl : "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv",     /*url for state level data*/ 
+        countyLevelUrl : "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv",  /*url for countylevel data*/
+    };
+
+    function gatherCsv(csvUrl) {                        /* retrieves csv from a URL */
+        $.ajax({
+            url: csvUrl, 
+            success: function(result){                  /* result is a csv string */
+                var csvData = csvToObject(result);      /* formats csv string into an object */
+                console.log(csvData)
+                /*we may use this data for visualization*/
+            }
+        });
+    }
+
+    $(document).ready(function(){
+
+        console.log("retrieving url from state level data")
+        gatherCsv(dataUrls.stateLevelUrl); 
+
+        console.log("retrieving url from county level data")
+        gatherCsv(dataUrls.countyLevelUrl);
+    });
+
+</script>
+{% endblock foot %}
