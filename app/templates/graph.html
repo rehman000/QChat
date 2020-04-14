@@ -5,9 +5,7 @@
 {% endblock head %}
 
 {% block content %}
-    <h1>Insert data visualization here</h1>
-    <div id="dataSelection" style="display: none;">
-        <select id="selectLevel" class="selectpicker"></select>
+    <div class="dataSelection" style="display: none;">
         <input id="searchRegion" list="regionDatalist">
         <datalist id="regionDatalist"></datalist>
         <button id="decideRegion" class="btn btn-primary">Select Region</button>
@@ -15,14 +13,16 @@
     <div class="dataWrapper">
         <div class="loading" id="loadData">
             <div class="loader"></div>
-            <h2>Retrieving data</h2>
+            <h2>Setting up</h2>
         </div>
-        <svg class="covidData" style="display: none;"></svg>
+        <div id="c19Data" style="display: none;">
+            <h2></h2>
+        </div>
     </div>
 {% endblock content %} 
 
 {% block foot %}
-<script src="https://d3js.org/d3.v5.js"></script>
+<script src="https://d3js.org/d3.v4.js"></script>
 <!-- retrieves library for parsing csv strings -->
 <script src="{{ url_for('static', filename='scripts/data-parse.js') }}"></script>
 <script src="{{ url_for('static', filename='scripts/templates/graph.js') }}"></script>

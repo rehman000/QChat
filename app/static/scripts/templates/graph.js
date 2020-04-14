@@ -2,164 +2,227 @@ $(document).ready(function () {
 
   /* PURE FUNCTIONS BELONG HERE */
 
-  /*The data used follow this format: date, state/county, fips, cases, deaths */
-
-  /*retrieves csv data from a URL issues a callback containing a CSVTable*/
-  function getC19Data(csvUrl) { 
-    /* retrives csv string from a synchronous ajax call */
-    var csvString = $.ajax({ 
-      type: "GET",
-      async: false,
-      url: csvUrl,
-    }).responseText;
-
-    /* csv string is parsed and returned */
-    return new dataParse.CSVTable(csvString);
-  }
-
-  /* data from a csv url and returns an object */
-  function Covid19Data(csvUrl) { 
-    var c19Table = getC19Data(csvUrl);
-    var locationsSet = new Set(c19Table.data.map(function(row){
-      return row[1];
-    }));
-
-    /* retrieves dates */
-    var dates = c19Table.data 
-      .map(function(row){
-        return row[0];
-      })
-      .filter(function(value, index, self) {
-        return self.indexOf(value) === index;
-      })
-      .map(function(dateString) {
-        return new Date(dateString);
-      });
-
-    dates.sort(function(a, b) {
-      if (a < b) return -1;
-      if (a > b) return 1;
-      else return 0;
-    });
-
-    /*sets the location asrray*/
-    this.locations = Array.from(locationsSet); 
-
-    /* sets the dates array */
-    this.dates = dates; 
-
-    /* sets the covid19Table */
-    this.data = c19Table.data.map(function(row){
-      row[0] = new Date(row[0]);
-      return row; 
-    }); 
-  }
-
-  /* represents the data level (i.e. state, county, eytc)*/
-  function DataLevel(name, url) { 
-    this.name = name;
-    this.url = url;
-    this.c19Data = new Covid19Data(url); 
-  }
+  /*The data used follow this format: date, state, fips, cases, deaths */
 
   /* STATES */
   var state = { 
     /* determines the index of what data level you are using*/
-    dataLevelIndex: 0,
     regionIndex: 0,
-    regions: ["all"] 
+    regions: [] 
   }
 
   /* CONSTANTS */
   var cnst = { 
-    /* data is loaded for each level */
-    dataLevels : [ 
-      new DataLevel("state", "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv"),
-      new DataLevel("county", "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv")
-    ],
-  }
-
-  /* graphing for for all regions for the latest date using a bar graph*/
-  function graphAllGraph() {
-    console.log("beginning to graph for all regions for the latest date")
+    dataUrl: "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv",
+    locations: []
   }
 
   /* graphing timeline for a specific region using a line graph*/
-  function graphRegionGraph() {
-    console.log("beginning to graph for all regions for the latest date")
+  function graph() {
+    /* set the dimensions and margins of the graph */
+    $("#c19Data").find("svg").remove();
+    var margin = {top: 20, right: 20, bottom: 80, left: 70},
+    width = 960 - margin.left - margin.right,
+    height = 500 - margin.top - margin.bottom;
+
+    /* parse the date / time */
+    var parseTime = d3.timeParse("%Y-%m-%d");
+
+    /* set the ranges */
+    var x = d3.scaleTime().range([0, width]);
+    var y = d3.scaleLinear().range([height, 0]);
+
+    /* define the 1st line */
+    var valueline = d3.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y(d.cases); });
+
+    /* define the 2nd line */
+    var valueline2 = d3.line()
+      .x(function(d) { return x(d.date); })
+      .y(function(d) { return y(d.deaths); });
+
+    var svg = d3.select("#c19Data").append("svg")
+      .attr("width", width + margin.left + margin.right)
+      .attr("height", height + margin.top + margin.bottom)
+      .append("g")
+      .attr("transform",
+            "translate(" + margin.left + "," + margin.top + ")");
+
+    function make_x_gridlines() {
+      return d3.axisBottom(x)
+        .ticks(5)
+    }
+    function make_y_gridlines() {
+      return d3.axisLeft(y)
+        .ticks(5)
+    }
+    
+    /*
+    legend = svg.append("g")
+      .attr("class","legend")
+      .attr("transform","translate(50,30)")
+      .style("font-size","12px")
+      .call(d3.legend)
+    */
+    svg.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "#69b3a2")
+    svg.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "#404080")
+    svg.append("text").attr("x", 220).attr("y", 130).text("Cases").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("text").attr("x", 220).attr("y", 160).text("Deaths").style("font-size", "15px").attr("alignment-baseline","middle")
+
+    /* Get the data */
+    d3.csv(cnst.dataUrl, function(error, data) {
+      if (error) throw error;
+
+      /* filter the data */
+      data = data.filter(function(d){
+        return d.state === state.regions[state.regionIndex];
+      })
+      .map(function(d){
+        return {
+          date: parseTime(d.date),
+          deaths: +d.deaths,
+          cases: +d.cases
+        }
+      });
+
+      /* Scale the range of the data */
+      x.domain(d3.extent(data, function(d) { return d.date; }));
+      y.domain([0, d3.max(data, function(d) {
+        return Math.max(d.deaths, d.cases); 
+      })]);
+
+      /* Add the valueline path. */
+      svg.append("path")
+        .data([data])
+        .attr("class", "line")
+        .style("stroke", "#69b3a2")
+        .attr("d", valueline);
+
+      /* Add the valueline2 path. */
+      svg.append("path")
+        .data([data])
+        .attr("class", "line")
+        .style("stroke", "#404080")
+        .attr("d", valueline2);
+
+      /* Add the X Axis */
+      svg.append("g")
+        .attr("transform", "translate(0," + height + ")")
+        .call(d3.axisBottom(x));
+
+      /* Add the Y Axis */
+      svg.append("g")
+        .call(d3.axisLeft(y));
+
+      /* text label for the x axis */
+      svg.append("text")             
+        .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 40) + ")")
+        .style("text-anchor", "middle")
+        .text("Date");
+
+      /* text label for the y axis */
+      svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("y", 0 - margin.left)
+        .attr("x",0 - (height / 2))
+        .attr("dy", "1em")
+        .style("text-anchor", "middle")
+        .text("Number of People");  
+
+      /* adding grid lines */
+      svg.append("g")
+        .attr("class","grid")
+        .attr("transform","translate(0," + height + ")")
+        .style("stroke-dasharray",("3,3"))
+        .call(make_x_gridlines()
+              .tickSize(-height)
+              .tickFormat("")
+           );
+      svg.append("g")
+        .attr("class","grid")
+        .style("stroke-dasharray",("3,3"))
+        .call(
+          make_y_gridlines()
+            .tickSize(-width)
+            .tickFormat("")
+        );
+
+
+    });
   }
 
-  /* all graphing will occure here */
-  function graph() {
-    if(state.regionIndex == 0) {
-      graphAllGraph();
-    } else {
-      graphRegionGraph();
-    }
+  function displayLoad() {
+    $("#loadData").show(); 
+    $("#c19Data").hide();
+    $(".dataSelection").hide();
   }
+
+  function noDisplayLoad() {
+    $("#loadData").hide(); 
+    $("#c19Data").show();
+    $(".dataSelection").show();
+  }
+
+  function setupRegions(){
+    var csvString = $.ajax({ 
+      type: "GET",
+      async: false,
+      url: cnst.dataUrl,
+    }).responseText;
+    var c19Table = new dataParse.CSVTable(csvString);
+    var regionsSet = new Set(c19Table.data.map(function(row){
+      return row[1];
+    }));
+    var regions = Array.from(regionsSet);
+    regions.sort();
+    state.regions = regions;
+
+    state.regionIndex = state.regions.indexOf("New York");
+    console.log(state.regionIndex)
+    if (state.regionIndex == -1) {
+      state.regionIndex = 0;
+    }
+  };
 
   function setupSelectRegion() {
-    var locations = cnst.dataLevels[state.dataLevelIndex].c19Data.locations;
-    locations.sort()
-    var regions = ["all"].concat(locations);
-    state.regions = regions;
-    state.regionIndex = 0;
+    setupRegions();
     $("#regionDatalist").empty();
-    for(var i = 0; i < regions.length; i++) { 
-      $("#regionDatalist").append(new Option(regions[i], regions[i]));
+    for(var i = 0; i < state.regions.length; i++) { 
+      $("#regionDatalist").append(new Option(state.regions[i], state.regions[i]));
     }
-    $("#regionDatalist").val(regions[state.regionIndex]);
+    $("#regionDatalist").val(state.regions[state.regionIndex]);
+    $("#c19Data").find("h2").html(state.regions[state.regionIndex]);
+
   }
-
-  /* data should already be loaded */
-  $("#loadData").hide(); 
-  $(".covidData").show();
-  $("#dataSelection").show(); 
-
-  /* sets a data level option */
-  for(var i = 0; i < cnst.dataLevels.length; i++) { 
-    $('#selectLevel').append(new Option(cnst.dataLevels[i].name, i))
-  }
-
-  /* every time a selection is made, the data must then be graphed and the state is updated*/
-  $('#selectLevel').change(function(){
-    var index = $(this).children("option:selected").val();
-    state.dataLevelIndex = index;
-
-    /* since the level has changed the region selector must update as well*/
-    setupSelectRegion(); 
-    
-    /* graph must be updated as well */
-    graph();
-
-    var dataLevel = cnst.dataLevels[index];
-    console.log(dataLevel);
-  });
 
   /* every time a region is selected the state must update and the data be graphed again */
   $('#decideRegion').click(function(){
     var region = $("#searchRegion").val();
-    console.log(region)
     var index = state.regions.indexOf(region);
     if(index < 0) {
+      alert("region does not exist");
       return;
     }
     state.regionIndex = index;
+    displayLoad();
     graph();
-
-    console.log(cnst.dataLevels[state.dataLevelIndex]);
-    var data = cnst.dataLevels[state.dataLevelIndex].c19Data.data
-      .filter(function(row) {
-        return state.regions[index] === row[1];
-      });
-    console.log(data)
+    noDisplayLoad();
+    $("#c19Data").find("h2").html(state.regions[state.regionIndex]);
   });
 
-  /* set up default selections */
+  $("#legend").empty(); /* legend not needed */
+
+  /* indicates things are being set up */
+  displayLoad();
+
+  /* set up default selections and their assosiated states*/
   setupSelectRegion();
   $('#selectLevel').val(state.regionIndex);
+  
   /* default graph is given */
   graph();
 
-  console.log(cnst.dataLevels[state.dataLevelIndex]);
+  /* everything is set up */
+  noDisplayLoad();
 });
