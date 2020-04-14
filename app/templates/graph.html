@@ -5,16 +5,16 @@
 {% endblock head %}
 
 {% block content %}
-    <div class="dataSelection" style="display: none;">
-        <select id="selectRegion" class="selectpicker"></select>
-        <button id="decideRegion" class="btn btn-primary">Select Region</button>
+    <div class="dataDisplay" style="display: none;">
+        <select id="selectRegion" class="selectpicker selection-margin"></select>
+        <button id="decideRegion" class="btn btn-primary selection-margin">Select Region</button>
     </div>
     <div class="dataWrapper">
         <div class="loading" id="loadData">
             <div class="loader"></div>
             <h2>Setting up</h2>
         </div>
-        <div id="c19Data" style="display: none;">
+        <div class="dataDisplay" style="display: none;">
             <h2></h2>
             <svg id="chart"></svg>
         </div>

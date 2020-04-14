@@ -6,6 +6,8 @@ $(document).ready(function () {
   var state = { 
     /* determines the index of what region you are graphing*/
     regionIndex: 0,
+    /* buffer for the dataset*/
+    cData: null,
   }
 
   /* CONSTANTS (except in the case of setting up these values)*/
@@ -13,8 +15,106 @@ $(document).ready(function () {
     /* url for a csv file */
     dataUrl: "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv",
     /* an array of regions you can select */
-    regions: [],
-    chartMargin: {top: 20, right: 20, bottom: 80, left: 70}
+    regions: []
+  }
+
+  function isDataLoaded() {
+    return (state.cData)? true : false;
+  }
+
+  function graphData(data, margin, width, height, x, y, svg, valueline, valueline2) {
+    /* parse the date / time */
+    var parseTime = d3.timeParse("%Y-%m-%d");
+
+    /* filter the data */
+    data = data.filter(function(d){
+      return d.state === cnst.regions[state.regionIndex];
+    })
+    .map(function(d){
+      return {
+        date: parseTime(d.date),
+        deaths: +d.deaths,
+        cases: +d.cases
+      }
+    });
+
+    /* Scale the range of the data */
+    x.domain(d3.extent(data, function(d) { return d.date; }));
+    y.domain([0, d3.max(data, function(d) {
+      return Math.max(d.deaths, d.cases); 
+    })]);
+
+    /* Add the valueline path. */
+    svg.append("path")
+      .data([data])
+      .attr("class", "line")
+      .style("stroke", "#69b3a2")
+      .attr("d", valueline);
+
+    /* Add the valueline2 path. */
+    svg.append("path")
+      .data([data])
+      .attr("class", "line")
+      .style("stroke", "#404080")
+      .attr("d", valueline2);
+
+    /* Add the X Axis */
+    // svg.append("g")
+    //   .attr("transform", "translate(0," + height + ")")
+    //   .call(d3.axisBottom(x));
+
+    svg.append("g")
+      .attr("class", "axis")
+      .attr("transform", "translate(0," + height + ")")
+      .call(d3.axisBottom(x)
+              .ticks(5));
+
+    /* Add the Y Axis */
+    svg.append("g")
+      .call(d3.axisLeft(y));
+
+    /* text label for the x axis */
+    svg.append("text")             
+      .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 40) + ")")
+      .style("text-anchor", "middle")
+      .text("Date");
+
+    /* text label for the y axis */
+    svg.append("text")
+      .attr("transform", "rotate(-90)")
+      .attr("y", 0 - margin.left)
+      .attr("x",0 - (height / 2))
+      .attr("dy", "1em")
+      .style("text-anchor", "middle")
+      .text("Number of People");  
+
+    /* adding grid lines */
+
+    function make_x_gridlines() {
+      return d3.axisBottom(x)
+        .ticks(5)
+    }
+    function make_y_gridlines() {
+      return d3.axisLeft(y)
+        .ticks(5)
+    }
+
+    svg.append("g")
+      .attr("class","grid")
+      .attr("transform","translate(0," + height + ")")
+      .style("stroke-dasharray",("3,3"))
+      .call(make_x_gridlines()
+            .tickSize(-height)
+            .tickFormat("")
+          );
+    svg.append("g")
+      .attr("class","grid")
+      .style("stroke-dasharray",("3,3"))
+      .call(
+        make_y_gridlines()
+          .tickSize(-width)
+          .tickFormat("")
+      );
   }
 
   /* graphing timeline of covid-19 for a specific region using a line graph*/
@@ -23,12 +123,15 @@ $(document).ready(function () {
     $("#chart").empty();
 
     /* set the dimensions and margins of the graph */
-    var margin = cnst.chartMargin,
-    width = 960 - margin.left - margin.right,
-    height = 500 - margin.top - margin.bottom;
+    // var margin = {top: 20, right: 20, bottom: 80, left: 70},
+    // width = 960 - margin.left - margin.right,
+    // height = 500 - margin.top - margin.bottom;
+    var margin = {top: 20, right: 20, bottom: 80, left: 90},
+    width = Math.max(375, window.innerWidth/1.3) - margin.left - margin.right,
+    height = Math.max(375, window.innerHeight/1.3) - margin.top - margin.bottom;
 
-    /* parse the date / time */
-    var parseTime = d3.timeParse("%Y-%m-%d");
+    var widthScale = width / 1920;
+    var heightScale = height / 1080;
 
     /* set the ranges */
     var x = d3.scaleTime().range([0, width]);
@@ -50,113 +153,34 @@ $(document).ready(function () {
       .append("g")
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
-
-    function make_x_gridlines() {
-      return d3.axisBottom(x)
-        .ticks(5)
-    }
-    function make_y_gridlines() {
-      return d3.axisLeft(y)
-        .ticks(5)
-    }
     
-    svg.append("circle").attr("cx",200).attr("cy",130).attr("r", 6).style("fill", "#69b3a2")
-    svg.append("circle").attr("cx",200).attr("cy",160).attr("r", 6).style("fill", "#404080")
-    svg.append("text").attr("x", 220).attr("y", 130).text("Cases").style("font-size", "15px").attr("alignment-baseline","middle")
-    svg.append("text").attr("x", 220).attr("y", 160).text("Deaths").style("font-size", "15px").attr("alignment-baseline","middle")
+    svg.append("circle").attr("cx",200*widthScale).attr("cy",130*heightScale).attr("r", 6).style("fill", "#69b3a2");
+    svg.append("circle").attr("cx",200*widthScale).attr("cy",130*heightScale+30).attr("r", 6).style("fill", "#404080");
+    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Cases").style("font-size", "15px").attr("alignment-baseline","middle");
+    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale+30).text("Deaths").style("font-size", "15x").attr("alignment-baseline","middle");
+    
 
-    /* Get the data */
-    d3.csv(cnst.dataUrl, function(error, data) {
-      if (error) throw error;
-
-      /* filter the data */
-      data = data.filter(function(d){
-        return d.state === cnst.regions[state.regionIndex];
-      })
-      .map(function(d){
-        return {
-          date: parseTime(d.date),
-          deaths: +d.deaths,
-          cases: +d.cases
-        }
+    if (isDataLoaded()) {
+      graphData(state.cData, margin, width, height, x, y, svg, valueline, valueline2);
+    } else {
+      d3.csv(cnst.dataUrl, function(error, data) {
+        if (error) {throw error;} 
+        state.cData = data;
+        graphData(data, margin, width, height, x, y, svg, valueline, valueline2);
       });
-
-      /* Scale the range of the data */
-      x.domain(d3.extent(data, function(d) { return d.date; }));
-      y.domain([0, d3.max(data, function(d) {
-        return Math.max(d.deaths, d.cases); 
-      })]);
-
-      /* Add the valueline path. */
-      svg.append("path")
-        .data([data])
-        .attr("class", "line")
-        .style("stroke", "#69b3a2")
-        .attr("d", valueline);
-
-      /* Add the valueline2 path. */
-      svg.append("path")
-        .data([data])
-        .attr("class", "line")
-        .style("stroke", "#404080")
-        .attr("d", valueline2);
-
-      /* Add the X Axis */
-      svg.append("g")
-        .attr("transform", "translate(0," + height + ")")
-        .call(d3.axisBottom(x));
-
-      /* Add the Y Axis */
-      svg.append("g")
-        .call(d3.axisLeft(y));
-
-      /* text label for the x axis */
-      svg.append("text")             
-        .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 40) + ")")
-        .style("text-anchor", "middle")
-        .text("Date");
-
-      /* text label for the y axis */
-      svg.append("text")
-        .attr("transform", "rotate(-90)")
-        .attr("y", 0 - margin.left)
-        .attr("x",0 - (height / 2))
-        .attr("dy", "1em")
-        .style("text-anchor", "middle")
-        .text("Number of People");  
-
-      /* adding grid lines */
-      svg.append("g")
-        .attr("class","grid")
-        .attr("transform","translate(0," + height + ")")
-        .style("stroke-dasharray",("3,3"))
-        .call(make_x_gridlines()
-              .tickSize(-height)
-              .tickFormat("")
-           );
-      svg.append("g")
-        .attr("class","grid")
-        .style("stroke-dasharray",("3,3"))
-        .call(
-          make_y_gridlines()
-            .tickSize(-width)
-            .tickFormat("")
-        );
-    });
+    }
   }
 
   /* displays loading screen */
   function displayLoad() {
     $("#loadData").show(); 
-    $("#c19Data").hide();
-    $(".dataSelection").hide();
+    $(".dataDisplay").hide();
   }
 
   /* no longer displayes loading screen*/
   function noDisplayLoad() {
     $("#loadData").hide(); 
-    $("#c19Data").show();
-    $(".dataSelection").show();
+    $(".dataDisplay").show();
   }
 
   /* set up regions state */
@@ -209,6 +233,11 @@ $(document).ready(function () {
     graph();
     noDisplayLoad();
     $("#c19Data").find("h2").html(cnst.regions[state.regionIndex]);
+  });
+
+  $(window).resize(function() {
+    /* graph is recreated to ensure responsiveness */
+    graph();
   });
 
   /* indicates things are being set up */
