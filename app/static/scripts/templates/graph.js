@@ -156,18 +156,23 @@ $(document).ready(function () {
     
     svg.append("circle").attr("cx",200*widthScale).attr("cy",130*heightScale).attr("r", 6).style("fill", "#69b3a2");
     svg.append("circle").attr("cx",200*widthScale).attr("cy",130*heightScale+30).attr("r", 6).style("fill", "#404080");
-    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Cases").style("font-size", "15px").attr("alignment-baseline","middle");
+    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Cases").style("font-size", "18px").attr("alignment-baseline","middle");
     svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale+30).text("Deaths").style("font-size", "15x").attr("alignment-baseline","middle");
     
 
     if (isDataLoaded()) {
       graphData(state.cData, margin, width, height, x, y, svg, valueline, valueline2);
     } else {
-      d3.csv(cnst.dataUrl, function(error, data) {
-        if (error) {throw error;} 
-        state.cData = data;
-        graphData(data, margin, width, height, x, y, svg, valueline, valueline2);
-      });
+      try{
+        d3.csv(cnst.dataUrl, function(error, data) {
+          if (error) {throw error;} 
+          state.cData = data;
+          graphData(data, margin, width, height, x, y, svg, valueline, valueline2);
+        });
+      } catch (ex) {
+        $("#loadError").show();
+        $(".loading").hide();
+      }
     }
   }
 
