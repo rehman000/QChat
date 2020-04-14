@@ -1,5 +1,24 @@
-{% extends "template.html" %} {% block content %}
+{% extends "template.html" %} 
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='graph.css') }}">
+{% endblock head %}
+
+{% block content %}
     <h1>Insert data visualization here</h1>
+    <div id="dataSelection" style="display: none;">
+        <select id="selectLevel" class="selectpicker"></select>
+        <input id="searchRegion" list="regionDatalist">
+        <datalist id="regionDatalist"></datalist>
+        <button id="decideRegion" class="btn btn-primary">Select Region</button>
+    </div>
+    <div class="dataWrapper">
+        <div class="loading" id="loadData">
+            <div class="loader"></div>
+            <h2>Retrieving data</h2>
+        </div>
+        <svg class="covidData" style="display: none;"></svg>
+    </div>
 {% endblock content %} 
 
 {% block foot %}
