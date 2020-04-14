@@ -92,9 +92,7 @@
 
     <!-- Force HTTPS -->
     <script src="{{ url_for('static', filename='scripts/url.js') }}"></script>
-    <script>
-        redirectHTTPS();
-    </script>
+    <script src="{{ url_for('static', filename='scripts/templates/template.js') }}"></script>
     {% block foot %}
     {% endblock foot %}
 
