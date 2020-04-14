@@ -1,12 +1,10 @@
 {% extends "template.html" %} {% block content %}
-<!-- This jinja template is meant to act as a base line for other jinja templates to use for data visualization -->
+    <h1>Insert data visualization here</h1>
+{% endblock content %} 
 
-<!-- Insert visualization content here -->
-<h1>Insert data visualization here</h1>
-{% endblock content %} {% block foot %}
-<!-- import your scripts heere-->
+{% block foot %}
 <script src="https://d3js.org/d3.v5.js"></script>
-<script src="{{ url_for('static', filename='scripts/data-parse.js') }}"></script>
 <!-- retrieves library for parsing csv strings -->
+<script src="{{ url_for('static', filename='scripts/data-parse.js') }}"></script>
 <script src="{{ url_for('static', filename='scripts/templates/graph.js') }}"></script>
 {% endblock foot %}

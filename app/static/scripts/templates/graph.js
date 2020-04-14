@@ -6,14 +6,11 @@ $(document).ready(function () {
       "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-counties.csv" /*url for countylevel data*/,
   };
 
-  function gatherCsv(csvUrl) {
-    /* retrieves csv from a URL */ $.ajax({
+  function gatherCsv(csvUrl) { /*retrieves csv data from a URL */
+     $.ajax({ 
       url: csvUrl,
-      success: function (result) {
-        /* result is a csv string */
-        var csvData = csvToObject(
-          result
-        ); /* formats csv string into an object */
+      success: function (result) { /*result is a csv string */
+        var csvData = new dataParse.CSVTable(result); /* formats csv string into an object */
         console.log(csvData);
         /*we may use this data for visualization*/
       },
