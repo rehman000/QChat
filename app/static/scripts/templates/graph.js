@@ -6,24 +6,24 @@ $(document).ready(function () {
   var state = { 
     /* determines the index of what region you are graphing*/
     regionIndex: 0,
-    /* an array of regions tou can select */
-    regions: [] 
   }
 
   /* CONSTANTS (except in the case of setting up these values)*/
   var cnst = { 
     /* url for a csv file */
     dataUrl: "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv",
-    locations: []
+    /* an array of regions you can select */
+    regions: [],
+    chartMargin: {top: 20, right: 20, bottom: 80, left: 70}
   }
 
   /* graphing timeline of covid-19 for a specific region using a line graph*/
   function graph() {
 
-    $("#c19Data").find("svg").remove();
+    $("#chart").empty();
 
     /* set the dimensions and margins of the graph */
-    var margin = {top: 20, right: 20, bottom: 80, left: 70},
+    var margin = cnst.chartMargin,
     width = 960 - margin.left - margin.right,
     height = 500 - margin.top - margin.bottom;
 
@@ -44,7 +44,7 @@ $(document).ready(function () {
       .x(function(d) { return x(d.date); })
       .y(function(d) { return y(d.deaths); });
 
-    var svg = d3.select("#c19Data").append("svg")
+    var svg = d3.select("#chart")
       .attr("width", width + margin.left + margin.right)
       .attr("height", height + margin.top + margin.bottom)
       .append("g")
@@ -71,7 +71,7 @@ $(document).ready(function () {
 
       /* filter the data */
       data = data.filter(function(d){
-        return d.state === state.regions[state.regionIndex];
+        return d.state === cnst.regions[state.regionIndex];
       })
       .map(function(d){
         return {
@@ -177,10 +177,10 @@ $(document).ready(function () {
     }));
     var regions = Array.from(regionsSet);
     regions.sort();
-    state.regions = regions;
+    cnst.regions = regions;
 
     /* gets the default region index to choose the region to graph*/
-    state.regionIndex = state.regions.indexOf("New York");
+    state.regionIndex = cnst.regions.indexOf("New York");
     if (state.regionIndex < 0) {
       state.regionIndex = 0;
     }
@@ -189,29 +189,26 @@ $(document).ready(function () {
   /* sets up the selector for regions */
   function setupSelectRegion() {
     setupRegions();
-    $("#regionDatalist").empty();
-    for(var i = 0; i < state.regions.length; i++) { 
-      $("#regionDatalist").append(new Option(state.regions[i], state.regions[i]));
+    $("#selectRegion").empty();
+    for(var i = 0; i < cnst.regions.length; i++) { 
+      $("#selectRegion").append(new Option(cnst.regions[i], i));
     }
-    $("#regionDatalist").val(state.regions[state.regionIndex]);
-    $("#c19Data").find("h2").html(state.regions[state.regionIndex]);
-
+    $("#selectRegion").val(state.regionIndex);
+    $("#c19Data").find("h2").html(cnst.regions[state.regionIndex]);
   }
 
   /* every time a region is selected the state must update and the data be graphed again */
   $('#decideRegion').click(function(){
-    var region = $("#searchRegion").val();
-    var index = state.regions.indexOf(region);
+    var index = $( "#selectRegion option:selected" ).val();
     if(index < 0) {
-      /* alert may be replaced with something else */
-      alert("region does not exist");
+      alert("something went wrong")
       return;
     }
     state.regionIndex = index;
     displayLoad();
     graph();
     noDisplayLoad();
-    $("#c19Data").find("h2").html(state.regions[state.regionIndex]);
+    $("#c19Data").find("h2").html(cnst.regions[state.regionIndex]);
   });
 
   /* indicates things are being set up */

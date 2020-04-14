@@ -14,6 +14,12 @@
   animation: spin 2s linear infinite;
 }
 
+.axis path, .axis line {
+  fill: none;
+  stroke: #000;
+  shape-rendering: crispEdges;
+} 
+
 .grid line {
   stroke: lightgrey;
   stroke-opacity: 0.6;

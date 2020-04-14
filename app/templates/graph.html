@@ -6,8 +6,7 @@
 
 {% block content %}
     <div class="dataSelection" style="display: none;">
-        <input id="searchRegion" list="regionDatalist">
-        <datalist id="regionDatalist"></datalist>
+        <select id="selectRegion" class="selectpicker"></select>
         <button id="decideRegion" class="btn btn-primary">Select Region</button>
     </div>
     <div class="dataWrapper">
@@ -17,6 +16,7 @@
         </div>
         <div id="c19Data" style="display: none;">
             <h2></h2>
+            <svg id="chart"></svg>
         </div>
     </div>
 {% endblock content %} 
