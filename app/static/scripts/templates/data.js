@@ -93,7 +93,6 @@ $(document).ready(function () {
       covid19TableSmall = $("#covid19Table");
       covid19TableSmall.empty();
       covid19TableSmall.html("<tr></tr>");
-      // insertTableRow(covid19TableLarge, [tableHeadings[0], tableInfo[0]], 0, true, true);
       for(var i = 0; i < tableHeadings.length; i++) {
         appendTableRow(covid19TableSmall, [tableHeadings[i], tableInfo[i]], false, true);
       }
@@ -220,9 +219,9 @@ $(document).ready(function () {
   function graph() {
     displayLoad(); /* graph is being loaded */
     $("#chart").empty();
-    var margin = {top: 20, right: 20, bottom: 120, left: 130},
-    width = Math.max(375, window.innerWidth/1.5) - margin.left - margin.right,
-    height = Math.max(375, window.innerHeight/1.5) - margin.top - margin.bottom;
+    var margin = {top: 20, right: 20, bottom: 120, left: 130};
+    var width = Math.max(375, window.innerWidth*0.75) - margin.left - margin.right;
+    var height = Math.max(375, window.innerHeight*0.75) - margin.top - margin.bottom;
 
     var widthScale = width / 1920;
     var heightScale = height / 1080;
@@ -256,10 +255,12 @@ $(document).ready(function () {
       .attr("cx",200*widthScale).attr("cy",130*heightScale+30)
       .attr("r", 6).style("fill", "#404080");
 
-    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Total Cases")
+    svg.append("text")
+      .attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Total Cases")
       .style("font-size", "18px").attr("alignment-baseline","middle").style("font-weight", "bold");
 
-    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale+30).text("Total Deaths")
+    svg.append("text")
+      .attr("x", 200*widthScale + 20).attr("y", 130*heightScale+30).text("Total Deaths")
       .style("font-size", "18x").attr("alignment-baseline","middle").style("font-weight", "bold");
     
 
@@ -335,7 +336,7 @@ $(document).ready(function () {
       $("#selectRegion").append(new Option(cnst.regions[i], i));
     }
     $("#selectRegion").val(state.regionIndex);
-    $("#c19Data").find("h2").html(cnst.regions[state.regionIndex]);
+    $("#regionHeading").html(cnst.regions[state.regionIndex]);
   }
 
   /* every time a region is selected the state must update and the data be graphed again */
@@ -347,7 +348,7 @@ $(document).ready(function () {
     }
     state.regionIndex = index;
     graph()
-    $("#c19Data").find("h2").html(cnst.regions[state.regionIndex]);
+    $("#regionHeading").html(cnst.regions[state.regionIndex]);
   });
 
   $("#loadError").find("button").click(function(){

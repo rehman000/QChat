@@ -1,3 +1,7 @@
+.error-text {
+  color: red;
+}
+
 .line {
   fill: none;
   stroke: steelblue;

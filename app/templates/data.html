@@ -6,6 +6,7 @@
 
 {% block content %}
     <h1 class="text-center">COVID-19 Data</h1>
+    <h2 id="regionHeading" class="text-center"></h2>
     <div class="dataDisplay" style="display: none;">
         <div class="container">
             <div class="row">
@@ -20,7 +21,7 @@
     </div>
     <div class="dataWrapper">
         <div id="loadError" style="display: none;">
-            <h2 style="color:red;">404 data failed to load, try again</h2>
+            <h2 class="error-text">404 data failed to load, try again</h2>
             <button class="btn btn-dark">Click to load data again</button>
         </div>
         <div class="loading" id="loadData">
@@ -28,7 +29,6 @@
             <h2>Setting up</h2>
         </div>
         <div class="dataDisplay" style="display: none;">
-            <h2></h2>
             <table class="table table-bordered" id="covid19Table">
             </table> 
             <svg id="chart"></svg>
