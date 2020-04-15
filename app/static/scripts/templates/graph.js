@@ -59,24 +59,39 @@ $(document).ready(function () {
       .attr("d", valueline2);
 
     /* Add the X Axis */
-    // svg.append("g")
-    //   .attr("transform", "translate(0," + height + ")")
-    //   .call(d3.axisBottom(x));
 
     svg.append("g")
-      .attr("class", "axis")
+      .attr("class", "x axis")
       .attr("transform", "translate(0," + height + ")")
       .call(d3.axisBottom(x)
               .ticks(5));
 
     /* Add the Y Axis */
     svg.append("g")
+      .attr("class", "y axis")
       .call(d3.axisLeft(y));
+
+    /* format X axis texts */
+    svg.select(".x.axis")
+      .selectAll("text")
+      .attr("transform"," translate(-25,35) rotate(-65)") /* To rotate the texts on x axis. Translate y position a little bit to prevent overlapping on axis line. */
+      .style("font-size","18px") 
+      .style("font-weight", "560");
+
+    /* format Y axis texts */
+    svg.select(".y.axis")
+    .selectAll("text")
+    .attr("transform"," translate(-7,0)") 
+    .style("font-size", "17px")
+    .style("font-weight", "560");
+  
 
     /* text label for the x axis */
     svg.append("text")             
-      .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 40) + ")")
+      .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 90) + ")")
       .style("text-anchor", "middle")
+      .style("font-size", "25px")
+      .style("font-weight", "bold")
       .text("Date");
 
     /* text label for the y axis */
@@ -86,6 +101,8 @@ $(document).ready(function () {
       .attr("x",0 - (height / 2))
       .attr("dy", "1em")
       .style("text-anchor", "middle")
+      .style("font-size", "25px")
+      .style("font-weight", "bold")
       .text("Number of People");  
 
     /* adding grid lines */
@@ -121,14 +138,9 @@ $(document).ready(function () {
   function graph() {
 
     $("#chart").empty();
-
-    /* set the dimensions and margins of the graph */
-    // var margin = {top: 20, right: 20, bottom: 80, left: 70},
-    // width = 960 - margin.left - margin.right,
-    // height = 500 - margin.top - margin.bottom;
-    var margin = {top: 20, right: 20, bottom: 80, left: 90},
-    width = Math.max(375, window.innerWidth/1.3) - margin.left - margin.right,
-    height = Math.max(375, window.innerHeight/1.3) - margin.top - margin.bottom;
+    var margin = {top: 20, right: 20, bottom: 120, left: 130},
+    width = Math.max(375, window.innerWidth/1.4) - margin.left - margin.right,
+    height = Math.max(375, window.innerHeight/1.5) - margin.top - margin.bottom;
 
     var widthScale = width / 1920;
     var heightScale = height / 1080;
@@ -154,38 +166,62 @@ $(document).ready(function () {
       .attr("transform",
             "translate(" + margin.left + "," + margin.top + ")");
     
-    svg.append("circle").attr("cx",200*widthScale).attr("cy",130*heightScale).attr("r", 6).style("fill", "#69b3a2");
-    svg.append("circle").attr("cx",200*widthScale).attr("cy",130*heightScale+30).attr("r", 6).style("fill", "#404080");
-    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Cases").style("font-size", "18px").attr("alignment-baseline","middle");
-    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale+30).text("Deaths").style("font-size", "15x").attr("alignment-baseline","middle");
+    svg.append("circle")
+      .attr("cx",200*widthScale).attr("cy",130*heightScale)
+      .attr("r", 6).style("fill", "#69b3a2");
+
+    svg.append("circle")
+      .attr("cx",200*widthScale).attr("cy",130*heightScale+30)
+      .attr("r", 6).style("fill", "#404080");
+
+    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Cases")
+      .style("font-size", "18px").attr("alignment-baseline","middle").style("font-weight", "bold");
+
+    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale+30).text("Deaths")
+      .style("font-size", "15x").attr("alignment-baseline","middle").style("font-weight", "bold");
     
 
     if (isDataLoaded()) {
       graphData(state.cData, margin, width, height, x, y, svg, valueline, valueline2);
     } else {
-      try{
-        d3.csv(cnst.dataUrl, function(error, data) {
-          if (error) {throw error;} 
-          state.cData = data;
-          graphData(data, margin, width, height, x, y, svg, valueline, valueline2);
-        });
-      } catch (ex) {
-        $("#loadError").show();
-        $(".loading").hide();
-      }
+      d3.csv(cnst.dataUrl, function(error, data) {
+        if (error) {throw error;} 
+        state.cData = data;
+        graphData(data, margin, width, height, x, y, svg, valueline, valueline2);
+      });
     }
   }
 
   /* displays loading screen */
   function displayLoad() {
+    $("#loadError").hide();
     $("#loadData").show(); 
     $(".dataDisplay").hide();
   }
 
-  /* no longer displayes loading screen*/
-  function noDisplayLoad() {
+  /* displays result */
+  function displayResult() {
+    $("#loadError").hide();
     $("#loadData").hide(); 
     $(".dataDisplay").show();
+  }
+
+  /* displayy error */
+  function displayLoadError() {
+    $("#loadError").show();
+    $(".loading").hide();
+    $(".dataDisplay").hide();
+  }
+
+  /* load graph */
+  function loadGraph() {
+    try {
+      displayLoad();
+      graph();
+      displayResult();
+    } catch (err) {
+      displayLoadError();
+    }
   }
 
   /* set up regions state */
@@ -234,15 +270,17 @@ $(document).ready(function () {
       return;
     }
     state.regionIndex = index;
-    displayLoad();
-    graph();
-    noDisplayLoad();
+    loadGraph()
     $("#c19Data").find("h2").html(cnst.regions[state.regionIndex]);
   });
 
   $(window).resize(function() {
-    /* graph is recreated to ensure responsiveness */
-    graph();
+    /* graph is rerendered to ensure responsiveness */
+    try {
+      graph();
+    } catch (err) {
+      displayLoadError();
+    }
   });
 
   /* indicates things are being set up */
@@ -252,9 +290,5 @@ $(document).ready(function () {
   setupSelectRegion();
   $('#selectLevel').val(state.regionIndex);
   
-  /* default graph is given */
-  graph();
-
-  /* everything is set up so loading stops */
-  noDisplayLoad();
+  loadGraph();
 });
