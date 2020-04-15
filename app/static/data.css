@@ -33,6 +33,27 @@
   margin: 10px;
 }
 
+table {
+  width: 100%;
+}
+
+table th{
+  background-color: #330561;
+  color: white;
+  font-weight: bolder;
+}
+table tr{
+  background-color: #962bee;
+  color: white;
+  font-weight: bold;
+}
+
+@media only screen and (max-width: 768px) {
+  table tr {
+    background-color: #5909aa;
+  }
+}
+
 @keyframes spin {
   0% { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }

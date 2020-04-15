@@ -4,6 +4,7 @@ import os
 class Config:
     DOMAIN = "qchat.social"
     SQLALCHEMY_TRACK_MODIFICATIONS = False                                  # prevents SQL alchemy FSADeprecationWarning warning
+    SEND_FILE_MAX_AGE_DEFAULT = 0                                           # to prevent caching
     FLASK_ENV = os.environ.get('FLASK_ENV')
     CLOUDINARY_CLOUD_NAME = os.environ.get('CLOUDINARY_CLOUD_NAME')
     CLOUDINARY_API_KEY = os.environ.get('CLOUDINARY_API_KEY')

@@ -47,7 +47,7 @@ def home():                                                                     
 def about():
     return render_template('about.html', title='About us')
 
-@main.route('/graph')
-def graph():
-    return render_template('graph.html', title='COVID-19 Data')
+@main.route('/data')
+def data():
+    return render_template('data.html', title='COVID-19 Data')
 

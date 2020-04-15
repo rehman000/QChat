@@ -6,8 +6,8 @@ $(document).ready(function () {
   var state = { 
     /* determines the index of what region you are graphing*/
     regionIndex: 0,
-    /* buffer for the dataset*/
-    cData: null,
+    /* buffer for the datase. date, deaths, cases are the labels*/
+    cData: null, 
   }
 
   /* CONSTANTS (except in the case of setting up these values)*/
@@ -22,9 +22,91 @@ $(document).ready(function () {
     return (state.cData)? true : false;
   }
 
+  function isScreenSmall() {
+    return window.innerWidth <= 768;
+  }
+
+  function insertTableRow(table, rowData, index, isHeading, beginHeading=false) {
+    if(isHeading) {
+      beginHeading = true;
+    }
+    var elemTag = isHeading? '<th/>':'<td/>';
+    var startTag = beginHeading? '<th/>':'<td/>';
+    var newRow = $('<tr/>').insertAfter( table.find('tr').eq(index) );
+    $(rowData).each(function(colIndex) {  
+        if(colIndex == 0) {
+          newRow.append($(startTag).text(this));
+        } else {
+          newRow.append($(elemTag).text(this));
+        }
+    });
+    
+    return newRow;
+  }
+
+  function appendTableRow(table, rowData, isHeading, beginHeading=false) {
+    //table.find('tr:last').index() also works
+    return insertTableRow( table, rowData, -1, isHeading, beginHeading);
+  }
+
+  /* summerizes data into a table */
+  function dataTable(data) {
+    var formatTime = d3.timeFormat("%m/%d/%Y");
+
+    var latestInfo = data.reduce(function(currentMax, next){
+      return currentMax.date < next.date? next : currentMax
+    }, data[0]);
+    var previousInfo = data.reduce(function(currentMax, next){
+      if(+next.date === +latestInfo.date) {
+        return currentMax;
+      } else if(+currentMax.date === +latestInfo.date) {
+        return next;
+      } else {
+        return  currentMax.date < next.date? next : currentMax;
+      }
+    }, data[0]);
+    var sign = function(n) {
+      if (n>0) return '+';
+      else if(n<0) return '-';
+      else return '';
+    }
+    var latestDate = formatTime(latestInfo.date)
+    var prevDate = formatTime(previousInfo.date);
+    /*percentage of cases changed since prevDate*/
+    var casesChange = Math.round(100*(latestInfo.cases - previousInfo.cases)/previousInfo.cases);
+    /* percentage of deaths change since prevDate */
+    var deathsChange = Math.round(100*(latestInfo.deaths - previousInfo.deaths)/previousInfo.deaths); 
+    var deathRate = Math.round(100*latestInfo.deaths/latestInfo.cases);
+    var tableHeadings = ['Latest reported Date', 'Latest Total Cases', 'Cases changed since ' + prevDate, 'Latest Total Deaths', 'Deaths increased since ' + prevDate, 'Death Rate'];
+    var tableInfo = [
+      latestDate, 
+      latestInfo.cases.toLocaleString(), 
+      sign(casesChange) + ' ' + Math.abs(casesChange).toLocaleString() + '%', 
+      latestInfo.deaths.toLocaleString(), 
+      deathsChange.toLocaleString() + '%',
+      deathRate + '%'
+    ];
+    covid19TableLarge = $("#covid19Table");
+    covid19TableLarge.empty();
+    covid19TableLarge.html("<tr></tr>");
+    if(isScreenSmall()) {
+      covid19TableSmall = $("#covid19Table");
+      covid19TableSmall.empty();
+      covid19TableSmall.html("<tr></tr>");
+      // insertTableRow(covid19TableLarge, [tableHeadings[0], tableInfo[0]], 0, true, true);
+      for(var i = 0; i < tableHeadings.length; i++) {
+        appendTableRow(covid19TableSmall, [tableHeadings[i], tableInfo[i]], false, true);
+      }
+    } else {
+      insertTableRow(covid19TableLarge, tableHeadings, 0, true);
+      appendTableRow(covid19TableLarge, tableInfo, false);
+    }
+  }
+
   function graphData(data, margin, width, height, x, y, svg, valueline, valueline2) {
     /* parse the date / time */
     var parseTime = d3.timeParse("%Y-%m-%d");
+
     /* filter the data */
     data = data.filter(function(d){
       return d.state === cnst.regions[state.regionIndex];
@@ -36,6 +118,8 @@ $(document).ready(function () {
         cases: +d.cases
       }
     });
+
+    dataTable(data);
 
     /* Scale the range of the data */
     x.domain(d3.extent(data, function(d) { return d.date; }));
@@ -172,11 +256,11 @@ $(document).ready(function () {
       .attr("cx",200*widthScale).attr("cy",130*heightScale+30)
       .attr("r", 6).style("fill", "#404080");
 
-    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Cases")
+    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale).text("Total Cases")
       .style("font-size", "18px").attr("alignment-baseline","middle").style("font-weight", "bold");
 
-    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale+30).text("Deaths")
-      .style("font-size", "15x").attr("alignment-baseline","middle").style("font-weight", "bold");
+    svg.append("text").attr("x", 200*widthScale + 20).attr("y", 130*heightScale+30).text("Total Deaths")
+      .style("font-size", "18x").attr("alignment-baseline","middle").style("font-weight", "bold");
     
 
     if (isDataLoaded()) {

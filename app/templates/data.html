@@ -1,13 +1,22 @@
 {% extends "template.html" %} 
 
 {% block head %}
-<link rel="stylesheet" href="{{ url_for('static', filename='graph.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='data.css') }}">
 {% endblock head %}
 
 {% block content %}
+    <h1 class="text-center">COVID-19 Data</h1>
     <div class="dataDisplay" style="display: none;">
-        <select id="selectRegion" class="selectpicker selection-margin"></select>
-        <button id="decideRegion" class="btn btn-primary selection-margin">Select Region</button>
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 col-12">
+                    <select id="selectRegion" class="selectpicker selection-margin form-control" ></select>
+                </div>
+                <div class="col">
+                    <button id="decideRegion" class="btn btn-primary selection-margin">Select Region</button>
+                </div>
+            </div>
+        </div>
     </div>
     <div class="dataWrapper">
         <div id="loadError" style="display: none;">
@@ -20,6 +29,8 @@
         </div>
         <div class="dataDisplay" style="display: none;">
             <h2></h2>
+            <table class="table table-bordered" id="covid19Table">
+            </table> 
             <svg id="chart"></svg>
         </div>
     </div>
@@ -29,5 +40,5 @@
 <script src="https://d3js.org/d3.v4.js"></script>
 <!-- retrieves library for parsing csv strings -->
 <script src="{{ url_for('static', filename='scripts/data-parse.js') }}"></script>
-<script src="{{ url_for('static', filename='scripts/templates/graph.js') }}"></script>
+<script src="{{ url_for('static', filename='scripts/templates/data.js') }}"></script>
 {% endblock foot %}
