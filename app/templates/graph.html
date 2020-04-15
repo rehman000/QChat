@@ -10,7 +10,10 @@
         <button id="decideRegion" class="btn btn-primary selection-margin">Select Region</button>
     </div>
     <div class="dataWrapper">
-        <h2 id="loadError" style="display: none;color:red;">404 data failed to load, try again</h2>
+        <div id="loadError" style="display: none;">
+            <h2 style="color:red;">404 data failed to load, try again</h2>
+            <button class="btn btn-dark">Click to load data again</button>
+        </div>
         <div class="loading" id="loadData">
             <div class="loader"></div>
             <h2>Setting up</h2>

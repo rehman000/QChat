@@ -25,7 +25,6 @@ $(document).ready(function () {
   function graphData(data, margin, width, height, x, y, svg, valueline, valueline2) {
     /* parse the date / time */
     var parseTime = d3.timeParse("%Y-%m-%d");
-
     /* filter the data */
     data = data.filter(function(d){
       return d.state === cnst.regions[state.regionIndex];
@@ -84,7 +83,6 @@ $(document).ready(function () {
     .attr("transform"," translate(-7,0)") 
     .style("font-size", "17px")
     .style("font-weight", "560");
-  
 
     /* text label for the x axis */
     svg.append("text")             
@@ -136,10 +134,10 @@ $(document).ready(function () {
 
   /* graphing timeline of covid-19 for a specific region using a line graph*/
   function graph() {
-
+    displayLoad(); /* graph is being loaded */
     $("#chart").empty();
     var margin = {top: 20, right: 20, bottom: 120, left: 130},
-    width = Math.max(375, window.innerWidth/1.4) - margin.left - margin.right,
+    width = Math.max(375, window.innerWidth/1.5) - margin.left - margin.right,
     height = Math.max(375, window.innerHeight/1.5) - margin.top - margin.bottom;
 
     var widthScale = width / 1920;
@@ -183,11 +181,16 @@ $(document).ready(function () {
 
     if (isDataLoaded()) {
       graphData(state.cData, margin, width, height, x, y, svg, valueline, valueline2);
+      displayResult();
     } else {
       d3.csv(cnst.dataUrl, function(error, data) {
-        if (error) {throw error;} 
+        if (error) {
+          displayLoadError();
+          throw error;
+        } 
         state.cData = data;
         graphData(data, margin, width, height, x, y, svg, valueline, valueline2);
+        displayResult();
       });
     }
   }
@@ -211,17 +214,6 @@ $(document).ready(function () {
     $("#loadError").show();
     $(".loading").hide();
     $(".dataDisplay").hide();
-  }
-
-  /* load graph */
-  function loadGraph() {
-    try {
-      displayLoad();
-      graph();
-      displayResult();
-    } catch (err) {
-      displayLoadError();
-    }
   }
 
   /* set up regions state */
@@ -270,8 +262,12 @@ $(document).ready(function () {
       return;
     }
     state.regionIndex = index;
-    loadGraph()
+    graph()
     $("#c19Data").find("h2").html(cnst.regions[state.regionIndex]);
+  });
+
+  $("#loadError").find("button").click(function(){
+    graph();
   });
 
   $(window).resize(function() {
@@ -279,6 +275,7 @@ $(document).ready(function () {
     try {
       graph();
     } catch (err) {
+      console.log(err)
       displayLoadError();
     }
   });
@@ -290,5 +287,5 @@ $(document).ready(function () {
   setupSelectRegion();
   $('#selectLevel').val(state.regionIndex);
   
-  loadGraph();
+  graph();
 });
