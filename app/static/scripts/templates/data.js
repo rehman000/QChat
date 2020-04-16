@@ -104,9 +104,6 @@ $(document).ready(function () {
       deathsChange.toLocaleString() + '%',
       deathRate + '%'
     ];
-    covid19TableLarge = $("#covid19Table");
-    covid19TableLarge.empty();
-    covid19TableLarge.html("<tr></tr>");
     if(isScreenSmall()) {
       covid19TableSmall = $("#covid19Table");
       covid19TableSmall.empty();
@@ -115,6 +112,9 @@ $(document).ready(function () {
         appendTableRow(covid19TableSmall, [tableHeadings[i], tableInfo[i]], false, true);
       }
     } else {
+      covid19TableLarge = $("#covid19Table");
+      covid19TableLarge.empty();
+      covid19TableLarge.html("<tr></tr>");
       insertTableRow(covid19TableLarge, tableHeadings, 0, true);
       appendTableRow(covid19TableLarge, tableInfo, false);
     }
@@ -123,7 +123,6 @@ $(document).ready(function () {
   function graphData(data, margin, width, height, x, y, svg, valueline, valueline2) {
     /* parse the date / time */
     var parseTime = d3.timeParse("%Y-%m-%d");
-    console.log(data)
 
     /* filter the data */
     if(state.regionIndex != 0) {
@@ -178,7 +177,7 @@ $(document).ready(function () {
     /* format X axis texts */
     svg.select(".x.axis")
       .selectAll("text")
-      .attr("transform"," translate(-25,35) rotate(-65)") /* To rotate the texts on x axis. Translate y position a little bit to prevent overlapping on axis line. */
+      .attr("transform"," translate(-25,40) rotate(-65)") /* To rotate the texts on x axis. Translate y position a little bit to prevent overlapping on axis line. */
       .style("font-size","18px") 
       .style("font-weight", "560");
 
@@ -191,7 +190,7 @@ $(document).ready(function () {
 
     /* text label for the x axis */
     svg.append("text")             
-      .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 90) + ")")
+      .attr("transform", "translate(" + (width/2) + " ," + (height + margin.top + 100) + ")")
       .style("text-anchor", "middle")
       .style("font-size", "25px")
       .style("font-weight", "bold")
@@ -241,7 +240,7 @@ $(document).ready(function () {
   function graph() {
     displayLoad(); /* graph is being loaded */
     $("#chart").empty();
-    var margin = {top: 20, right: 20, bottom: 120, left: 130};
+    var margin = {top: 20, right: 20, bottom: 130, left: 130};
     var width = Math.max(375, window.innerWidth*0.40) - margin.left - margin.right;
     var height = Math.max(375, window.innerHeight*0.55) - margin.top - margin.bottom;
 
@@ -287,14 +286,11 @@ $(document).ready(function () {
     
 
     if (isDataLoaded()) {
-      console.log(1);
       graphData(state.cData, margin, width, height, x, y, svg, valueline, valueline2);
       state.regionLoadedIndex = state.regionIndex;
       displayResult();
     } else {
       d3.csv(selectedUrl(), function(error, data) {
-        console.log(2);
-        console.log(selectedUrl())
         if (error) {
           displayLoadError();
           throw error;
