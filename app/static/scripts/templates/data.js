@@ -220,8 +220,8 @@ $(document).ready(function () {
     displayLoad(); /* graph is being loaded */
     $("#chart").empty();
     var margin = {top: 20, right: 20, bottom: 120, left: 130};
-    var width = Math.max(375, window.innerWidth*0.75) - margin.left - margin.right;
-    var height = Math.max(375, window.innerHeight*0.75) - margin.top - margin.bottom;
+    var width = Math.max(375, window.innerWidth*0.40) - margin.left - margin.right;
+    var height = Math.max(375, window.innerHeight*0.55) - margin.top - margin.bottom;
 
     var widthScale = width / 1920;
     var heightScale = height / 1080;
