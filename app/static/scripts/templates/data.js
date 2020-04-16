@@ -4,6 +4,8 @@ $(document).ready(function () {
 
   /* STATES */
   var state = { 
+    /* index of the region you have loaded*/
+    regionLoadedIndex: -1,
     /* determines the index of what region you are graphing*/
     regionIndex: 0,
     /* buffer for the datase. date, deaths, cases are the labels*/
@@ -12,14 +14,30 @@ $(document).ready(function () {
 
   /* CONSTANTS (except in the case of setting up these values)*/
   var cnst = { 
-    /* url for a csv file */
-    dataUrl: "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv",
+    /* url for state data csv file */
+    stateUrl: "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us-states.csv",
+    /* url for US data csv file */
+    usUrl: "https://raw.githubusercontent.com/nytimes/covid-19-data/master/us.csv",
     /* an array of regions you can select */
     regions: []
   }
 
+  /* checks if data is loaded for the given selection*/
   function isDataLoaded() {
-    return (state.cData)? true : false;
+    /* checking if you switched to or from the 'ALL' selection */
+    var uSToState = state.regionLoadedIndex == 0 && state.regionIndex !== state.regionLoadedIndex;
+    var stateToUS = state.regionLoadedIndex !== 0 &&  state.regionIndex == 0;
+    var levelChanged = stateToUS || uSToState;
+
+    /* checking if data store is loaded */
+    var cDataLoaded = (state.cData)? true : false;
+
+    return !levelChanged && cDataLoaded;
+  }
+
+  /* gets the url for a given selection */
+  function selectedUrl() {
+    return state.regionIndex == 0 ? cnst.usUrl : cnst.stateUrl;
   }
 
   function isScreenSmall() {
@@ -105,12 +123,16 @@ $(document).ready(function () {
   function graphData(data, margin, width, height, x, y, svg, valueline, valueline2) {
     /* parse the date / time */
     var parseTime = d3.timeParse("%Y-%m-%d");
+    console.log(data)
 
     /* filter the data */
-    data = data.filter(function(d){
-      return d.state === cnst.regions[state.regionIndex];
-    })
-    .map(function(d){
+    if(state.regionIndex != 0) {
+      data = data.filter(function(d){
+        return d.state === cnst.regions[state.regionIndex];
+      });
+    }
+
+    data = data.map(function(d){
       return {
         date: parseTime(d.date),
         deaths: +d.deaths,
@@ -265,16 +287,21 @@ $(document).ready(function () {
     
 
     if (isDataLoaded()) {
+      console.log(1);
       graphData(state.cData, margin, width, height, x, y, svg, valueline, valueline2);
+      state.regionLoadedIndex = state.regionIndex;
       displayResult();
     } else {
-      d3.csv(cnst.dataUrl, function(error, data) {
+      d3.csv(selectedUrl(), function(error, data) {
+        console.log(2);
+        console.log(selectedUrl())
         if (error) {
           displayLoadError();
           throw error;
         } 
         state.cData = data;
         graphData(data, margin, width, height, x, y, svg, valueline, valueline2);
+        state.regionLoadedIndex = state.regionIndex;
         displayResult();
       });
     }
@@ -307,7 +334,7 @@ $(document).ready(function () {
     var csvString = $.ajax({ 
       type: "GET",
       async: false,
-      url: cnst.dataUrl,
+      url: cnst.stateUrl,
     }).responseText;
 
     /* csv string is formatted */
@@ -319,13 +346,10 @@ $(document).ready(function () {
     }));
     var regions = Array.from(regionsSet);
     regions.sort();
-    cnst.regions = regions;
+    cnst.regions = ['All'].concat(regions);
 
     /* gets the default region index to choose the region to graph*/
-    state.regionIndex = cnst.regions.indexOf("New York");
-    if (state.regionIndex < 0) {
-      state.regionIndex = 0;
-    }
+    state.regionIndex = 0;
   };
 
   /* sets up the selector for regions */
@@ -336,7 +360,9 @@ $(document).ready(function () {
       $("#selectRegion").append(new Option(cnst.regions[i], i));
     }
     $("#selectRegion").val(state.regionIndex);
-    $("#regionHeading").html(cnst.regions[state.regionIndex]);
+    var chosenRegion = cnst.regions[state.regionIndex];
+    var chosenRegion = chosenRegion === "All"? "US (All states)":chosenRegion;
+    $("#regionHeading").html(chosenRegion);
   }
 
   /* every time a region is selected the state must update and the data be graphed again */
