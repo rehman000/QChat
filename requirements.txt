@@ -35,7 +35,7 @@ h5py==2.10.0
 html5lib==1.0.1
 idna==2.9
 itsdangerous==1.1.0
-Jinja2==2.11.1
+Jinja2==2.11.3
 Keras-Preprocessing==1.1.0
 lxml==4.6.2
 Mako==1.1.2
