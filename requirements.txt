@@ -42,7 +42,7 @@ oauthlib==3.1.0
 passlib==1.7.2
 pdfminer==20191125
 pdfminer.six==20200124
-Pillow==8.1.1
+Pillow==8.2.0
 protobuf==3.11.3
 psycopg2-binary==2.9.1
 pyasn1==0.4.8
