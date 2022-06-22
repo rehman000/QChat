@@ -37,7 +37,7 @@ Mako==1.1.2
 Markdown==3.2.1
 MarkupSafe==1.1.1
 MongoSanitizer==0.0.1
-numpy==1.19.2
+numpy==1.22.0
 oauthlib==3.1.0
 passlib==1.7.2
 pdfminer==20191125
