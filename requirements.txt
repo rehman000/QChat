@@ -33,7 +33,7 @@ idna==2.9
 itsdangerous==1.1.0
 Jinja2==2.11.3
 lxml==4.6.3
-Mako==1.1.2
+Mako==1.2.2
 Markdown==3.2.1
 MarkupSafe==1.1.1
 MongoSanitizer==0.0.1
